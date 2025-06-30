@@ -568,29 +568,25 @@
         // procesar grupos
         groups.forEach((g, gi) => {
           const kids = GROUPS[g];
+          // descartar ubicaciones sin datos
+          const existingKids = kids.filter((k) => LOCATIONS[k]);
+          if (!existingKids.length) return;
           // arrays de cada hijo
-          const allKidsArr = kids.map(
-            (kid) => {
-              const d = LOCATIONS[kid];
-              const infl =
-                mode === "optimistic"
-                  ? d.inflLow
-                  : mode === "pessimistic"
-                    ? d.inflHigh
-                    : d.inflMid;
-              return priceArrFor(kid, infl);
-            }
-          );
+          const allKidsArr = existingKids.map((kid) => {
+            const d = LOCATIONS[kid];
+            const infl =
+              mode === "optimistic"
+                ? d.inflLow
+                : mode === "pessimistic"
+                  ? d.inflHigh
+                  : d.inflMid;
+            return priceArrFor(kid, infl);
+          });
           // media elemento a elemento
-          const avgPrice = allKidsArr[0].map(
-            (_, idx) => {
-              const sum = allKidsArr.reduce(
-                (s, arr) => s + arr[idx],
-                0
-              );
-              return sum / kids.length;
-            }
-          );
+          const avgPrice = allKidsArr[0].map((_, idx) => {
+            const sum = allKidsArr.reduce((s, arr) => s + arr[idx], 0);
+            return sum / existingKids.length;
+          });
           let propArr, label;
           if (propMetric === "price") {
             propArr = avgPrice.map((v) =>
