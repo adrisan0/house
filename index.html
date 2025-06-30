@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8"/>
+    <meta
+      name="viewport"
+      content="width=device-width,
+               initial-scale=1.0"
+    />
+    <title>
+      Housing Affordability – Multi-Location Comparator (v3.3)
+    </title>
+    <style>
+      :root {
+        --bg: #121212;
+        --panel: #1e1e1e;
+        --accent: #3b82f6;
+        --text: #e5e5e5;
+        --good: #22c55e;
+        --bad: #ef4444;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        padding: 20px;
+      }
+      h1 {
+        margin-bottom: 10px;
+        font-size: 1.4rem;
+        text-align: center;
+      }
+      .wrap {
+        display: grid;
+        grid-template-columns: 290px 1fr;
+        gap: 20px;
+        width: 100%;
+        max-width: 1250px;
+      }
+      select,
+      input[type="number"],
+      input[type="range"],
+      button {
+        width: 100%;
+        padding: 6px;
+        border-radius: 4px;
+        border: 1px solid #333;
+        background: #0f0f0f;
+        color: var(--text);
+      }
+      label {
+        font-size: 0.85rem;
+        display: block;
+        margin: 8px 0 4px;
+      }
+      .panel {
+        background: var(--panel);
+        padding: 20px;
+        border-radius: 8px;
+      }
+      .result {
+        margin-top: 10px;
+        font-weight: 600;
+      }
+      canvas {
+        background: #0f0f0f;
+        border-radius: 6px;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
+  </head>
+  <body>
+    <h1>Housing Affordability – Compare Locations</h1>
+    <div class="wrap">
+      <div class="panel">
+        <label>
+          Locations (Ctrl/Cmd + click to multi-select)
+        </label>
+        <select id="loc" multiple size="14">
+          <optgroup label="Centro">
+            <option value="grupo_Centro">
+              Centro (grupo)
+            </option>
+            <option>La Latina</option>
+            <option>Lavapiés</option>
+            <option>Malasaña</option>
+          </optgroup>
+          <optgroup label="Periferia municipal">
+            <option value="grupo_PeriferiaMunicipal">
+              Periferia municipal (grupo)
+            </option>
+            <option>San Isidro</option>
+            <option>Embajadores</option>
+            <option>Barajas</option>
+          </optgroup>
+          <optgroup label="Periferia provincial">
+            <option value="grupo_PeriferiaProvincial">
+              Periferia provincial (grupo)
+            </option>
+            <option>Segovia</option>
+            <option>Guadalajara</option>
+          </optgroup>
+          <optgroup label="Sierra Madrid">
+            <option value="grupo_SierraMadrid">
+              Sierra Madrid (grupo)
+            </option>
+            <option>Becerril</option>
+            <option>Navacerrada</option>
+          </optgroup>
+          <optgroup label="Costa Andaluza">
+            <option value="grupo_CostaAndaluza">
+              Costa Andaluza (grupo)
+            </option>
+            <option>Costa Andaluza</option>
+          </optgroup>
+          <optgroup label="Almería">
+            <option value="grupo_Almeria">
+              Almería (grupo)
+            </option>
+            <option value="Centro Almería">Centro Almería</option>
+            <option value="Retamar">Retamar</option>
+            <option value="Aguadulce">Aguadulce</option>
+            <option value="Roquetas de Mar">Roquetas de Mar</option>
+          </optgroup>
+          <optgroup label="Canarias">
+            <option value="grupo_Canarias">
+              Canarias (grupo)
+            </option>
+            <option>Lanzarote</option>
+            <option>La Palma</option>
+            <option>Tenerife</option>
+            <option>Gran Canaria</option>
+          </optgroup>
+        </select>
+
+        <label>
+          Years until purchase:
+          <span id="yrsLabel">2</span>
+        </label>
+        <input
+          id="yrs"
+          type="range"
+          min="1"
+          max="15"
+          value="2"
+        />
+
+        <label>Dwelling size (m²)</label>
+        <input
+          id="size"
+          type="number"
+          value="80"
+          min="30"
+          max="300"
+        />
+
+        <label>Starting net salary (€/month)</label>
+        <input
+          id="salary"
+          type="number"
+          value="1450"
+        />
+
+        <label>
+          Savings rate (
+          <span id="rateLabel">40</span>%)
+        </label>
+        <input
+          id="rate"
+          type="range"
+          min="10"
+          max="70"
+          step="5"
+          value="40"
+        />
+
+        <label>
+          Expected annual return on savings (%)
+        </label>
+        <input
+          id="ret"
+          type="number"
+          value="2"
+          step="0.1"
+          min="0"
+          max="10"
+        />
+
+        <label>Market scenario</label>
+        <select id="scenario">
+          <option value="base">
+            Base (histórico)
+          </option>
+          <option value="optimistic">
+            Optimista (IPC +1 %)
+          </option>
+          <option value="pessimistic">
+            Pesimista (pico histórico)
+          </option>
+        </select>
+
+        <label>Career path</label>
+        <select id="career">
+          <option value="stay">
+            ⏳ Seguir en empresa actual
+          </option>
+          <option value="odoo">
+            🚀 Cambiar a otro partner Odoo
+          </option>
+          <option value="ai">
+            🤖 Pivotar a IA/Python
+          </option>
+        </select>
+
+        <label>Property metric</label>
+        <select id="propMetric">
+          <option value="price">
+            🏠 Precio vivienda
+          </option>
+          <option value="down">
+            💰 Entrada 20%
+          </option>
+          <option value="mortgage">
+            📈 Cuota hipoteca
+          </option>
+        </select>
+
+        <label>Personal metric</label>
+        <select id="persMetric">
+          <option value="savings">
+            💸 Ahorros acumulados
+          </option>
+          <option value="salary">
+            🪙 Salario neto mensual
+          </option>
+        </select>
+
+        <label>Mortgage rate (%)</label>
+        <input
+          id="mortRate"
+          type="number"
+          value="3"
+          step="0.1"
+          min="0"
+          max="10"
+        />
+
+        <label>Mortgage term (years)</label>
+        <input
+          id="mortYears"
+          type="number"
+          value="30"
+          min="5"
+          max="40"
+        />
+
+        <button
+          id="update"
+          style="
+            margin-top: 14px;
+            background: var(--accent);
+            border: none;
+            color: white;
+            cursor: pointer;
+          "
+        >
+          Update
+        </button>
+
+        <div class="result" id="summary"></div>
+        <p
+          style="font-size:0.7rem;
+                 opacity:0.7;
+                 margin-top:10px;"
+        >
+          Precios: Idealista 05/2025 ·
+          Salarios: Glassdoor 2024-25
+        </p>
+      </div>
+
+      <div class="panel">
+        <canvas id="chart" height="300"></canvas>
+      </div>
+    </div>
+
+    <script>
+      const LOCATIONS = {
+        "La Latina": {
+          price: 5100,
+          inflLow: 0.03,
+          inflMid: 0.07,
+          inflHigh: 0.12
+        },
+        // ... (resto de ubicaciones originales)
+        "Barajas": {
+          price: 3700,
+          inflLow: 0.025,
+          inflMid: 0.055,
+          inflHigh: 0.09
+        },
+        "Centro Almería": {
+          price: 1800,
+          inflLow: 0.02,
+          inflMid: 0.045,
+          inflHigh: 0.07
+        },
+        "Retamar": {
+          price: 1900,
+          inflLow: 0.02,
+          inflMid: 0.045,
+          inflHigh: 0.07
+        },
+        "Aguadulce": {
+          price: 2000,
+          inflLow: 0.022,
+          inflMid: 0.05,
+          inflHigh: 0.075
+        },
+        "Roquetas de Mar": {
+          price: 1750,
+          inflLow: 0.018,
+          inflMid: 0.04,
+          inflHigh: 0.065
+        }
+      };
+
+      const GROUPS = {
+        grupo_Centro: [
+          "La Latina",
+          "Lavapiés",
+          "Malasaña"
+        ],
+        grupo_PeriferiaMunicipal: [
+          "San Isidro",
+          "Embajadores",
+          "Barajas"
+        ],
+        grupo_PeriferiaProvincial: [
+          "Segovia",
+          "Guadalajara"
+        ],
+        grupo_SierraMadrid: [
+          "Becerril",
+          "Navacerrada"
+        ],
+        grupo_CostaAndaluza: [
+          "Costa Andaluza"
+        ],
+        grupo_Canarias: [
+          "Lanzarote",
+          "La Palma",
+          "Tenerife",
+          "Gran Canaria"
+        ],
+        grupo_Almeria: [
+          "Centro Almería",
+          "Retamar",
+          "Aguadulce",
+          "Roquetas de Mar"
+        ]
+      };
+
+      const CAREERS = {
+        stay: { growth: [0.05, 0.03, 0.02] },
+        odoo: { growth: [0.1, 0.05, 0.03] },
+        ai: { growth: [0.15, 0.08, 0.04] }
+      };
+
+      /* refs */
+      const locSel =
+        document.getElementById("loc");
+      const yrsInput =
+        document.getElementById("yrs");
+      const yrsLabel =
+        document.getElementById("yrsLabel");
+      const sizeInput =
+        document.getElementById("size");
+      const salaryInput =
+        document.getElementById("salary");
+      const rateInput =
+        document.getElementById("rate");
+      const rateLabel =
+        document.getElementById("rateLabel");
+      const retInput =
+        document.getElementById("ret");
+      const scenarioSel =
+        document.getElementById("scenario");
+      const careerSel =
+        document.getElementById("career");
+      const propMetricSel =
+        document.getElementById("propMetric");
+      const persMetricSel =
+        document.getElementById("persMetric");
+      const mortRateInput =
+        document.getElementById("mortRate");
+      const mortYearsInput =
+        document.getElementById("mortYears");
+
+      [yrsInput, rateInput].forEach(
+        (el) => {
+          el.addEventListener(
+            "input",
+            () => {
+              yrsLabel.textContent =
+                yrsInput.value;
+              rateLabel.textContent =
+                rateInput.value;
+            }
+          );
+        }
+      );
+
+      const palette = [
+        "#f87171", "#fbbf24", "#34d399",
+        "#60a5fa", "#c084fc", "#f472b6",
+        "#facc15", "#38bdf8", "#818cf8",
+        "#a3e635", "#f97316", "#ef4444"
+      ];
+      let chart;
+
+      function growth(y) {
+        const g =
+          CAREERS[
+            careerSel.value
+          ].growth;
+        if (y < 5) {
+          return g[0];
+        } else if (y < 10) {
+          return g[1];
+        }
+        return g[2];
+      }
+
+      function mortPayment(
+        principal,
+        ratePct,
+        years
+      ) {
+        const r =
+          ratePct / 100 / 12;
+        const n = years * 12;
+        if (r === 0) {
+          return principal / n;
+        }
+        return (
+          (principal
+            * r
+            * Math.pow(1 + r, n))
+          / (Math.pow(1 + r, n) - 1)
+        );
+      }
+
+      function calc() {
+        const raw = [
+          ...locSel.selectedOptions
+        ].map((o) => o.value);
+
+        const groups = raw.filter(
+          (v) => GROUPS[v]
+        );
+        let indiv = raw.filter(
+          (v) => !GROUPS[v]
+        );
+        // si se elige grupo, ignorar sus hijos
+        indiv = indiv.filter(
+          (name) =>
+            !groups.some((g) =>
+              GROUPS[g].includes(name)
+            )
+        );
+
+        if (!raw.length) {
+          alert("Selecciona al menos uno");
+          return;
+        }
+
+        const yrs = +yrsInput.value;
+        const m2 = +sizeInput.value;
+        const base = +salaryInput.value;
+        const saveRate =
+          +rateInput.value / 100;
+        const ret =
+          +retInput.value / 100;
+        const propMetric =
+          propMetricSel.value;
+        const persMetric =
+          persMetricSel.value;
+        const mortRate =
+          +mortRateInput.value;
+        const mortYears =
+          +mortYearsInput.value;
+
+        const labels = Array.from(
+          { length: yrs + 1 },
+          (_, i) => 2025 + i
+        );
+
+        // métricas personales
+        let stash = 3000;
+        let net = base;
+        const savingsArr = [];
+        const salaryArr = [];
+        for (
+          let y = 0;
+          y <= yrs;
+          y++
+        ) {
+          if (y) {
+            net *= 1 + growth(y - 1);
+          }
+          salaryArr.push(Math.round(net));
+          stash *= 1 + ret;
+          stash += net * saveRate * 12;
+          savingsArr.push(
+            Math.round(stash)
+          );
+        }
+
+        const datasets = [];
+        // personal
+        if (persMetric === "savings") {
+          datasets.push({
+            label: "Savings €",
+            data: savingsArr,
+            borderColor: "#22c55e",
+            tension: 0.2,
+            borderWidth: 2
+          });
+        } else {
+          datasets.push({
+            label: "Net salary €/mo",
+            data: salaryArr,
+            borderColor: "#22d3ee",
+            tension: 0.2,
+            borderWidth: 2
+          });
+        }
+
+        // función auxiliar para array de precio según infl
+        function priceArrFor(
+          name,
+          infl
+        ) {
+          const d = LOCATIONS[name];
+          return Array.from(
+            { length: yrs + 1 },
+            (_, y) =>
+              d.price
+              * Math.pow(1 + infl, y)
+              * m2
+          );
+        }
+
+        const mode = scenarioSel.value;
+
+        // procesar grupos
+        groups.forEach((g, gi) => {
+          const kids = GROUPS[g];
+          // arrays de cada hijo
+          const allKidsArr = kids.map(
+            (kid) => {
+              const d = LOCATIONS[kid];
+              const infl =
+                mode === "optimistic"
+                  ? d.inflLow
+                  : mode === "pessimistic"
+                    ? d.inflHigh
+                    : d.inflMid;
+              return priceArrFor(kid, infl);
+            }
+          );
+          // media elemento a elemento
+          const avgPrice = allKidsArr[0].map(
+            (_, idx) => {
+              const sum = allKidsArr.reduce(
+                (s, arr) => s + arr[idx],
+                0
+              );
+              return sum / kids.length;
+            }
+          );
+          let propArr, label;
+          if (propMetric === "price") {
+            propArr = avgPrice.map((v) =>
+              Math.round(v)
+            );
+            label = `${g.replace(
+              "grupo_",
+              ""
+            )} price €`;
+          } else if (
+            propMetric === "down"
+          ) {
+            propArr = avgPrice.map((v) =>
+              Math.round(v * 0.2)
+            );
+            label = `${g.replace(
+              "grupo_",
+              ""
+            )} down 20% €`;
+          } else {
+            propArr = avgPrice.map((v) =>
+              Math.round(
+                mortPayment(
+                  v * 0.8,
+                  mortRate,
+                  mortYears
+                )
+              )
+            );
+            label = `${g.replace(
+              "grupo_",
+              ""
+            )} mortgage €/mo`;
+          }
+          datasets.push({
+            label,
+            data: propArr,
+            borderColor:
+              palette[
+                (indiv.length + gi)
+                % palette.length
+              ],
+            tension: 0.2,
+            borderWidth: 2
+          });
+        });
+
+        // procesar individuales
+        indiv.forEach((name, i) => {
+          const d = LOCATIONS[name];
+          const infl =
+            mode === "optimistic"
+              ? d.inflLow
+              : mode === "pessimistic"
+                ? d.inflHigh
+                : d.inflMid;
+          const priceArr = priceArrFor(
+            name,
+            infl
+          );
+          let propArr, label;
+          if (propMetric === "price") {
+            propArr = priceArr.map((v) =>
+              Math.round(v)
+            );
+            label = `${name} price €`;
+          } else if (
+            propMetric === "down"
+          ) {
+            propArr = priceArr.map((v) =>
+              Math.round(v * 0.2)
+            );
+            label = `${name} down 20% €`;
+          } else {
+            propArr = priceArr.map((v) =>
+              Math.round(
+                mortPayment(
+                  v * 0.8,
+                  mortRate,
+                  mortYears
+                )
+              )
+            );
+            label = `${name} mortgage €/mo`;
+          }
+          datasets.push({
+            label,
+            data: propArr,
+            borderColor: palette[i % palette.length],
+            tension: 0.2,
+            borderWidth: 2
+          });
+        });
+
+        // summary y render idéntico al anterior...
+        const propVal = datasets[1].data.at(-1);
+        const personalVal =
+          persMetric === "savings"
+            ? savingsArr.at(-1)
+            : salaryArr.at(-1);
+        let summaryHTML = "";
+        if (propMetric === "down") {
+          const ok = personalVal >= propVal;
+          summaryHTML =
+            `Necesitas ${propVal.toLocaleString()}€ ` +
+            `para la entrada.<br>` +
+            `${persMetric === "savings"
+              ? "Ahorros"
+              : "Salario"
+            } tras ${yrs} años: ` +
+            `<span style="color:${
+              ok
+                ? "var(--good)"
+                : "var(--bad)"
+            }">${
+              personalVal.toLocaleString()
+            }€</span>`;
+        } else if (
+          propMetric === "mortgage"
+        ) {
+          const ok =
+            personalVal * 0.35 >= propVal;
+          summaryHTML =
+            `Cuota estimada: ${propVal.toLocaleString()}€ / mes.<br>` +
+            `Salario final: ` +
+            `<span style="color:${
+              ok
+                ? "var(--good)"
+                : "var(--bad)"
+            }">${
+              salaryArr
+                .at(-1)
+                .toLocaleString()
+            }€ / mes</span>`;
+        } else {
+          summaryHTML =
+            `Precio estimado en ${yrs} años: ` +
+            `${propVal.toLocaleString()}€`;
+        }
+        document.getElementById(
+          "summary"
+        ).innerHTML = summaryHTML;
+
+        if (chart) chart.destroy();
+        chart = new Chart(
+          document.getElementById("chart"),
+          {
+            type: "line",
+            data: { labels, datasets },
+            options: {
+              plugins: {
+                legend: {
+                  labels: {
+                    color: "#e5e5e5"
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  ticks: { color: "#e5e5e5" }
+                },
+                y: {
+                  ticks: { color: "#e5e5e5" }
+                }
+              }
+            }
+          }
+        );
+      }
+
+      document.getElementById("update")
+        .addEventListener("click", calc);
+      calc();
+    </script>
+  </body>
+</html>
