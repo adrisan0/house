@@ -437,6 +437,15 @@
         return g[2];
       }
 
+      // Return a yearly inflation adjusting long-term expectations.
+      function inflationFor(year, base) {
+        if (year < 5) {
+          return base;
+        }
+        const reduced = base - 0.005 * (year - 4);
+        return Math.max(reduced, 0.02);
+      }
+
       function mortPayment(
         principal,
         ratePct,
@@ -543,18 +552,15 @@
         }
 
         // función auxiliar para array de precio según infl
-        function priceArrFor(
-          name,
-          infl
-        ) {
+        function priceArrFor(name, infl) {
           const d = LOCATIONS[name];
-          return Array.from(
-            { length: yrs + 1 },
-            (_, y) =>
-              d.price
-              * Math.pow(1 + infl, y)
-              * m2
-          );
+          const arr = [d.price * m2];
+          let price = d.price;
+          for (let y = 1; y <= yrs; y++) {
+            price *= 1 + inflationFor(y, infl);
+            arr.push(price * m2);
+          }
+          return arr;
         }
 
         const mode = scenarioSel.value;
