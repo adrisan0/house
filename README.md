@@ -19,3 +19,5 @@ To build a robust housing affordability calculator, consider integrating the fol
 - **Docker** to standardize development and deployment.
 
 The main application logic now resides in `main.js`, which is loaded from `index.html`.
+Two helper buttons allow quickly selecting all individual locations or all
+location groups in the list.

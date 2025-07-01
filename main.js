@@ -158,6 +158,8 @@
   const persMetricSel = document.getElementById("persMetric");
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
+  const allLocsBtn = document.getElementById("allLocs");
+  const allGroupsBtn = document.getElementById("allGroups");
 
   [yrsInput, rateInput].forEach((el) => {
     el.addEventListener("input", () => {
@@ -419,5 +421,17 @@
   }
 
   document.getElementById("update").addEventListener("click", calc);
+  allLocsBtn.addEventListener("click", () => {
+    [...locSel.options].forEach((o) => {
+      o.selected = !GROUPS[o.value];
+    });
+    calc();
+  });
+  allGroupsBtn.addEventListener("click", () => {
+    [...locSel.options].forEach((o) => {
+      o.selected = !!GROUPS[o.value];
+    });
+    calc();
+  });
   calc();
 })();
