@@ -151,6 +151,7 @@
   const rateInput = document.getElementById("rate");
   const rateLabel = document.getElementById("rateLabel");
   const retInput = document.getElementById("ret");
+  const inflFloorInput = document.getElementById("inflFloor");
   const scenarioSel = document.getElementById("scenario");
   const careerSel = document.getElementById("career");
   const propMetricSel = document.getElementById("propMetric");
@@ -191,13 +192,17 @@
     return g[2];
   }
 
-  // Return a yearly inflation adjusting long-term expectations.
-  function inflationFor(year, base) {
+  /**
+   * Return inflation for the given year.
+   * Inflation gradually decreases after year 4 until reaching
+   * the supplied floor value.
+   */
+  function inflationFor(year, base, floor) {
     if (year < 5) {
       return base;
     }
     const reduced = base - 0.005 * (year - 4);
-    return Math.max(reduced, 0.02);
+    return Math.max(reduced, floor);
   }
 
   function mortPayment(principal, ratePct, years) {
@@ -229,6 +234,7 @@
     const base = +salaryInput.value;
     const saveRate = +rateInput.value / 100;
     const ret = +retInput.value / 100;
+    const inflFloor = +inflFloorInput.value / 100;
     const propMetric = propMetricSel.value;
     const persMetric = persMetricSel.value;
     const mortRate = +mortRateInput.value;
@@ -271,13 +277,13 @@
       });
     }
 
-    // función auxiliar para array de precio según infl
-    function priceArrFor(name, infl) {
+    // Helper to build a price array using inflation and floor
+    function priceArrFor(name, infl, floor) {
       const d = LOCATIONS[name];
       const arr = [d.price * m2];
       let price = d.price;
       for (let y = 1; y <= yrs; y++) {
-        price *= 1 + inflationFor(y, infl);
+        price *= 1 + inflationFor(y, infl, floor);
         arr.push(price * m2);
       }
       return arr;
@@ -297,7 +303,7 @@
             : mode === "pessimistic"
               ? d.inflHigh
               : d.inflMid;
-        return priceArrFor(kid, infl);
+        return priceArrFor(kid, infl, inflFloor);
       });
       // media elemento a elemento
       const avgPrice = allKidsArr[0].map((_, idx) => {
@@ -335,7 +341,7 @@
           : mode === "pessimistic"
             ? d.inflHigh
             : d.inflMid;
-      const priceArr = priceArrFor(name, infl);
+      const priceArr = priceArrFor(name, infl, inflFloor);
       let propArr, label;
       if (propMetric === "price") {
         propArr = priceArr.map((v) => Math.round(v));
