@@ -113,13 +113,17 @@
       inflMid: 0.05,
       inflHigh: 0.075,
     },
-    "Roquetas de Mar": {
+  "Roquetas de Mar": {
       price: 1750,
       inflLow: 0.018,
       inflMid: 0.04,
       inflHigh: 0.065,
     },
   };
+
+  if (window.PROVINCE_DATA) {
+    Object.assign(LOCATIONS, window.PROVINCE_DATA);
+  }
 
   const GROUPS = {
     grupo_Centro: ["La Latina", "Lavapiés", "Malasaña"],

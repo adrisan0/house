@@ -19,3 +19,4 @@ To build a robust housing affordability calculator, consider integrating the fol
 - **Docker** to standardize development and deployment.
 
 The main application logic now resides in `main.js`, which is loaded from `index.html`.
+All Spanish provinces are available through `provinces.js`, allowing price projections for any province.
