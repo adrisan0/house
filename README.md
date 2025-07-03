@@ -8,7 +8,8 @@ prices. Inflation starts at the chosen scenario rate and gradually decreases
 after five years toward a long‑term floor. The floor can now be customized via
 an "Inflation floor" input in the interface.
 Users can also set their initial savings amount through a new "Initial savings"
-input field.
+input field. The calculator now remembers your selections using browser
+storage, with a "Reset" button to clear them.
 
 ## Professional Tools & Libraries
 
