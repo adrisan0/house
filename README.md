@@ -9,7 +9,8 @@ after five years toward a long‑term floor. The floor can now be customized via
 an "Inflation floor" input in the interface.
 Users can also set their initial savings amount through a new "Initial savings"
 input field. The calculator now remembers your selections using browser
-storage, with a "Reset" button to clear them.
+storage, with a "Reset" button to clear them. A "Toggle theme" control lets
+you switch between dark and light modes, and your preference is saved.
 
 ## Professional Tools & Libraries
 

@@ -163,7 +163,18 @@
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
   const initSavingsInput = document.getElementById("initSavings");
+  const themeToggle = document.getElementById("themeToggle");
   const resetBtn = document.getElementById("reset");
+
+  /**
+   * Reflect current theme in the toggle button text.
+   */
+  function updateThemeLabel() {
+    themeToggle.textContent =
+      document.documentElement.dataset.theme === "light"
+        ? "Dark theme"
+        : "Light theme";
+  }
 
   const defaults = {
     loc: [],
@@ -180,10 +191,12 @@
     mortRate: mortRateInput.value,
     mortYears: mortYearsInput.value,
     initSavings: initSavingsInput.value,
+    theme: document.documentElement.dataset.theme || "dark",
   };
 
   /**
-   * Load saved user settings from localStorage, if any.
+   * Load saved user settings from localStorage, if any, including
+   * the interface theme.
    */
   function loadState() {
     const raw = localStorage.getItem("calcState");
@@ -195,6 +208,10 @@
           o.selected = state.loc.includes(o.value);
         });
       }
+      if (state.theme) {
+        document.documentElement.dataset.theme = state.theme;
+      }
+      updateThemeLabel();
       Object.keys(defaults).forEach((k) => {
         if (k === "loc") return;
         const el = document.getElementById(k);
@@ -208,7 +225,7 @@
   }
 
   /**
-   * Save current settings to localStorage.
+   * Save current settings, including theme selection, to localStorage.
    */
   function saveState() {
     const state = {};
@@ -218,6 +235,7 @@
       const el = document.getElementById(k);
       if (el) state[k] = el.value;
     });
+    state.theme = document.documentElement.dataset.theme || "dark";
     localStorage.setItem("calcState", JSON.stringify(state));
   }
 
@@ -485,6 +503,14 @@
     calc();
   });
 
+  themeToggle.addEventListener("click", () => {
+    const current = document.documentElement.dataset.theme;
+    const next = current === "light" ? "dark" : "light";
+    document.documentElement.dataset.theme = next;
+    updateThemeLabel();
+    saveState();
+  });
+
   resetBtn.addEventListener("click", () => {
     localStorage.removeItem("calcState");
     Object.keys(defaults).forEach((k) => {
@@ -495,9 +521,12 @@
       const el = document.getElementById(k);
       if (el) el.value = defaults[k];
     });
+    document.documentElement.dataset.theme = defaults.theme;
+    updateThemeLabel();
     calc();
   });
 
   loadState();
+  updateThemeLabel();
   calc();
 })();

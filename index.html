@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8"/>
     <meta
@@ -19,6 +19,14 @@
         --text: #e5e5e5;
         --good: #22c55e;
         --bad: #ef4444;
+      }
+      :root[data-theme="light"] {
+        --bg: #f5f5f5;
+        --panel: #ffffff;
+        --accent: #3b82f6;
+        --text: #222222;
+        --good: #16a34a;
+        --bad: #dc2626;
       }
       body {
         margin: 0;
@@ -78,6 +86,7 @@
   </head>
   <body>
     <h1>Housing Affordability – Compare Locations</h1>
+    <button id="themeToggle" style="margin-bottom:10px;">Toggle theme</button>
     <div class="wrap">
       <div class="panel">
         <label>
