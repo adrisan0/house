@@ -163,6 +163,63 @@
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
   const initSavingsInput = document.getElementById("initSavings");
+  const resetBtn = document.getElementById("reset");
+
+  const defaults = {
+    loc: [],
+    yrs: yrsInput.value,
+    size: sizeInput.value,
+    salary: salaryInput.value,
+    rate: rateInput.value,
+    ret: retInput.value,
+    inflFloor: inflFloorInput.value,
+    scenario: scenarioSel.value,
+    career: careerSel.value,
+    propMetric: propMetricSel.value,
+    persMetric: persMetricSel.value,
+    mortRate: mortRateInput.value,
+    mortYears: mortYearsInput.value,
+    initSavings: initSavingsInput.value,
+  };
+
+  /**
+   * Load saved user settings from localStorage, if any.
+   */
+  function loadState() {
+    const raw = localStorage.getItem("calcState");
+    if (!raw) return;
+    try {
+      const state = JSON.parse(raw);
+      if (Array.isArray(state.loc)) {
+        [...locSel.options].forEach((o) => {
+          o.selected = state.loc.includes(o.value);
+        });
+      }
+      Object.keys(defaults).forEach((k) => {
+        if (k === "loc") return;
+        const el = document.getElementById(k);
+        if (el && state[k] !== undefined) {
+          el.value = state[k];
+        }
+      });
+    } catch (_) {
+      // ignore broken data
+    }
+  }
+
+  /**
+   * Save current settings to localStorage.
+   */
+  function saveState() {
+    const state = {};
+    state.loc = [...locSel.selectedOptions].map((o) => o.value);
+    Object.keys(defaults).forEach((k) => {
+      if (k === "loc") return;
+      const el = document.getElementById(k);
+      if (el) state[k] = el.value;
+    });
+    localStorage.setItem("calcState", JSON.stringify(state));
+  }
 
   [yrsInput, rateInput].forEach((el) => {
     el.addEventListener("input", () => {
@@ -423,6 +480,24 @@
     });
   }
 
-  document.getElementById("update").addEventListener("click", calc);
+  document.getElementById("update").addEventListener("click", () => {
+    saveState();
+    calc();
+  });
+
+  resetBtn.addEventListener("click", () => {
+    localStorage.removeItem("calcState");
+    Object.keys(defaults).forEach((k) => {
+      if (k === "loc") {
+        [...locSel.options].forEach((o) => (o.selected = false));
+        return;
+      }
+      const el = document.getElementById(k);
+      if (el) el.value = defaults[k];
+    });
+    calc();
+  });
+
+  loadState();
   calc();
 })();
