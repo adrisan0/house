@@ -162,6 +162,7 @@
   const persMetricSel = document.getElementById("persMetric");
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
+  const initSavingsInput = document.getElementById("initSavings");
 
   [yrsInput, rateInput].forEach((el) => {
     el.addEventListener("input", () => {
@@ -246,8 +247,8 @@
 
     const labels = Array.from({ length: yrs + 1 }, (_, i) => 2025 + i);
 
-    // métricas personales
-    let stash = 3000;
+    // personal metrics
+    let stash = +initSavingsInput.value;
     let net = base;
     const savingsArr = [];
     const salaryArr = [];
