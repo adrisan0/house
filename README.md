@@ -6,7 +6,8 @@ browser to use it.
 The estimator now applies a dynamic inflation model when projecting property
 prices. Inflation starts at the chosen scenario rate and gradually decreases
 after five years toward a long‑term floor. The floor can now be customized via
-an "Inflation floor" input in the interface.
+an "Inflation floor" input in the interface. Projections can begin from any
+starting year thanks to the new "Start year" field.
 Users can also set their initial savings amount through a new "Initial savings"
 input field. The calculator now remembers your selections using browser
 storage, with a "Reset" button to clear them. A "Toggle theme" control lets
