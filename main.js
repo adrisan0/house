@@ -1,7 +1,8 @@
 /**
  * Housing affordability calculator logic.
  * Updates charts based on user input.
- */
+ * The required down payment percentage is user configurable.
+*/
 (() => {
   "use strict";
   const LOCATIONS = {
@@ -163,6 +164,7 @@
   const persMetricSel = document.getElementById("persMetric");
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
+  const downPctInput = document.getElementById("downPct");
   const initSavingsInput = document.getElementById("initSavings");
   const themeToggle = document.getElementById("themeToggle");
   const resetBtn = document.getElementById("reset");
@@ -187,6 +189,7 @@
     rate: rateInput.value,
     ret: retInput.value,
     inflFloor: inflFloorInput.value,
+    downPct: downPctInput.value,
     scenario: scenarioSel.value,
     career: careerSel.value,
     propMetric: propMetricSel.value,
@@ -326,6 +329,7 @@
     const saveRate = +rateInput.value / 100;
     const ret = +retInput.value / 100;
     const inflFloor = +inflFloorInput.value / 100;
+    const downPct = +downPctInput.value / 100;
     const propMetric = propMetricSel.value;
     const persMetric = persMetricSel.value;
     const mortRate = +mortRateInput.value;
@@ -409,11 +413,11 @@
         propArr = avgPrice.map((v) => Math.round(v));
         label = `${g.replace("grupo_", "")} price €`;
       } else if (propMetric === "down") {
-        propArr = avgPrice.map((v) => Math.round(v * 0.2));
-        label = `${g.replace("grupo_", "")} down 20% €`;
+        propArr = avgPrice.map((v) => Math.round(v * downPct));
+        label = `${g.replace("grupo_", "")} down ${downPct * 100}% €`;
       } else {
         propArr = avgPrice.map((v) =>
-          Math.round(mortPayment(v * 0.8, mortRate, mortYears)),
+          Math.round(mortPayment(v * (1 - downPct), mortRate, mortYears)),
         );
         label = `${g.replace("grupo_", "")} mortgage €/mo`;
       }
@@ -441,11 +445,11 @@
         propArr = priceArr.map((v) => Math.round(v));
         label = `${name} price €`;
       } else if (propMetric === "down") {
-        propArr = priceArr.map((v) => Math.round(v * 0.2));
-        label = `${name} down 20% €`;
+        propArr = priceArr.map((v) => Math.round(v * downPct));
+        label = `${name} down ${downPct * 100}% €`;
       } else {
         propArr = priceArr.map((v) =>
-          Math.round(mortPayment(v * 0.8, mortRate, mortYears)),
+          Math.round(mortPayment(v * (1 - downPct), mortRate, mortYears)),
         );
         label = `${name} mortgage €/mo`;
       }
@@ -466,7 +470,7 @@
         gapYear = labels[reachIdx];
       }
       datasets.push({
-        label: "Gap savings vs 20% down €",
+        label: `Gap savings vs ${downPct * 100}% down €`,
         data: gapData.map((v) => Math.round(v)),
         borderColor: "#fb923c",
         tension: 0.2,
@@ -491,7 +495,7 @@
       const ok = personalVal >= propVal;
       summaryHTML =
         `Necesitas ${propVal.toLocaleString()}€ ` +
-        `para la entrada.<br>` +
+        `para la entrada (${downPct * 100}%).<br>` +
         `${
           persMetric === "savings" ? "Ahorros" : "Salario"
         } tras ${yrs} años: ` +
