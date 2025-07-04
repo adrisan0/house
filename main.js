@@ -150,6 +150,7 @@
   const locSel = document.getElementById("loc");
   const yrsInput = document.getElementById("yrs");
   const yrsLabel = document.getElementById("yrsLabel");
+  const startYearInput = document.getElementById("startYear");
   const sizeInput = document.getElementById("size");
   const salaryInput = document.getElementById("salary");
   const rateInput = document.getElementById("rate");
@@ -180,6 +181,7 @@
   const defaults = {
     loc: [],
     yrs: yrsInput.value,
+    startYear: startYearInput.value,
     size: sizeInput.value,
     salary: salaryInput.value,
     rate: rateInput.value,
@@ -197,7 +199,7 @@
 
   /**
    * Load saved user settings from localStorage, if any, including
-   * the interface theme.
+   * the interface theme and starting year.
    */
   function loadState() {
     const raw = localStorage.getItem("calcState");
@@ -226,7 +228,8 @@
   }
 
   /**
-   * Save current settings, including theme selection, to localStorage.
+   * Save current settings, including theme selection and starting year,
+   * to localStorage.
    */
   function saveState() {
     const state = {};
@@ -298,6 +301,7 @@
 
   /**
    * Calculate projection data and update the chart.
+   * The starting year is configurable via the "startYear" input.
    * When both savings and down-payment metrics are active,
    * an additional dataset shows the gap and the year the goal is reached.
    */
@@ -327,7 +331,8 @@
     const mortRate = +mortRateInput.value;
     const mortYears = +mortYearsInput.value;
 
-    const labels = Array.from({ length: yrs + 1 }, (_, i) => 2025 + i);
+    const startYear = +startYearInput.value;
+    const labels = Array.from({ length: yrs + 1 }, (_, i) => startYear + i);
 
     // personal metrics
     let stash = +initSavingsInput.value;
