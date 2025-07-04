@@ -165,6 +165,7 @@
   const initSavingsInput = document.getElementById("initSavings");
   const themeToggle = document.getElementById("themeToggle");
   const resetBtn = document.getElementById("reset");
+  const csvBtn = document.getElementById("exportCsv");
 
   /**
    * Reflect current theme in the toggle button text.
@@ -261,6 +262,7 @@
     "#ef4444",
   ];
   let chart;
+  let lastCalc;
 
   function growth(y) {
     const g = CAREERS[careerSel.value].growth;
@@ -444,6 +446,14 @@
       });
     });
 
+    lastCalc = {
+      labels: [...labels],
+      datasets: datasets.map((ds) => ({
+        label: ds.label,
+        data: [...ds.data],
+      })),
+    };
+
     // summary y render idéntico al anterior...
     const propVal = datasets[1].data.at(-1);
     const personalVal =
@@ -498,10 +508,31 @@
     });
   }
 
+  /**
+   * Download the last calculated dataset as a CSV file.
+   */
+  function exportCSV() {
+    if (!lastCalc) return;
+    const header = ["Year", ...lastCalc.datasets.map((d) => d.label)].join(",");
+    const rows = lastCalc.labels.map((year, idx) => {
+      const values = lastCalc.datasets.map((d) => d.data[idx]);
+      return [year, ...values].join(",");
+    });
+    const csv = [header, ...rows].join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "projection.csv";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   document.getElementById("update").addEventListener("click", () => {
     saveState();
     calc();
   });
+
+  csvBtn.addEventListener("click", exportCSV);
 
   themeToggle.addEventListener("click", () => {
     const current = document.documentElement.dataset.theme;
