@@ -13,6 +13,9 @@ storage, with a "Reset" button to clear them. A "Toggle theme" control lets
 you switch between dark and light modes, and your preference is saved.
 You can now export the latest projection to a CSV file using the "Download CSV"
 button.
+When viewing savings against the required 20% down payment, the chart displays
+a new "gap" line. The summary also indicates the year your savings cover the
+down payment if it occurs within the projection period.
 
 ## Professional Tools & Libraries
 
