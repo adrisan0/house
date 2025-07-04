@@ -296,6 +296,11 @@
     return (principal * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1);
   }
 
+  /**
+   * Calculate projection data and update the chart.
+   * When both savings and down-payment metrics are active,
+   * an additional dataset shows the gap and the year the goal is reached.
+   */
   function calc() {
     const raw = [...locSel.selectedOptions].map((o) => o.value);
 
@@ -358,6 +363,8 @@
         borderWidth: 2,
       });
     }
+
+    let gapYear = null;
 
     // Helper to build a price array using inflation and floor
     function priceArrFor(name, infl, floor) {
@@ -446,6 +453,22 @@
       });
     });
 
+    if (propMetric === "down" && persMetric === "savings" && datasets.length > 1) {
+      const downData = datasets[1].data;
+      const gapData = downData.map((v, idx) => savingsArr[idx] - v);
+      const reachIdx = gapData.findIndex((v) => v >= 0);
+      if (reachIdx >= 0) {
+        gapYear = labels[reachIdx];
+      }
+      datasets.push({
+        label: "Gap savings vs 20% down €",
+        data: gapData.map((v) => Math.round(v)),
+        borderColor: "#fb923c",
+        tension: 0.2,
+        borderWidth: 2,
+      });
+    }
+
     lastCalc = {
       labels: [...labels],
       datasets: datasets.map((ds) => ({
@@ -470,6 +493,9 @@
         `<span style="color:${
           ok ? "var(--good)" : "var(--bad)"
         }">${personalVal.toLocaleString()}€</span>`;
+      if (gapYear) {
+        summaryHTML += `<br>Entrada alcanzada en ${gapYear}`;
+      }
     } else if (propMetric === "mortgage") {
       const ok = personalVal * 0.35 >= propVal;
       summaryHTML =
