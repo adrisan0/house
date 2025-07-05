@@ -174,6 +174,9 @@
     ai: { growth: [0.15, 0.08, 0.04] },
   };
 
+  const STAY_RAISE = 2000; // € raise every 18 months
+  const STAY_CAP = 30000; // gross annual cap
+
   /* refs */
   const locSel = document.getElementById("loc");
   const yrsInput = document.getElementById("yrs");
@@ -869,11 +872,18 @@ function buildExpenseUI() {
     // personal metrics
     let stash = +initSavingsInput.value;
     let net = base;
+    const baseAnnual = base * 12;
     const savingsArr = [];
     const salaryArr = [];
     for (let y = 0; y <= yrs; y++) {
       if (y) {
-        net *= 1 + growth(y - 1);
+        if (careerSel.value === "stay") {
+          const raises = Math.floor((y * 12) / 18);
+          const annual = Math.min(baseAnnual + raises * STAY_RAISE, STAY_CAP);
+          net = annual / 12;
+        } else {
+          net *= 1 + growth(y - 1);
+        }
       }
       salaryArr.push(Math.round(net));
       stash *= 1 + ret;

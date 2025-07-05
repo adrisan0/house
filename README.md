@@ -52,6 +52,8 @@ after volver a cargar la página.
 
 Job hopping can now be modeled by selecting a change year and future career
 path. Salary growth switches to the new trajectory from that year onward.
+When choosing "Seguir en empresa actual", the salary increases 2000 € brutos
+cada 18 meses hasta un máximo de 30000 € anuales.
 The savings rate editor now uses an interactive curve. Click on a year to add
 a node and drag it vertically to adjust the rate. The node follows the mouse
 for smooth real-time feedback. When a node is moved, all later years inherit
