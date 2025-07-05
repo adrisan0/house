@@ -24,6 +24,8 @@
  * follow the mouse vertically while dragging for precise control.
  * Dataset labels are now drawn next to the end of each line for
  * easier identification without relying solely on the legend.
+ * Province selection used to include an interactive mini map. This has
+ * been removed for a simpler setup.
 */
 (() => {
   "use strict";
@@ -197,67 +199,8 @@
   const newCareerSel = document.getElementById("newCareer");
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
-  const mapContainer = document.getElementById("map");
-  let spainMap;
-
-  /**
-   * Initialize the Spain mini map for province selection.
-   *
-   * When the page is opened directly from the file system some
-   * browsers may not load the vector map library correctly. The
-   * event listener is therefore attached only if the created map
-   * exposes the `on` method.
-   */
-  function initMap() {
-    if (!window.jsVectorMap || !window.PROVINCE_CODES || !mapContainer) return;
-
-    const codeToName = {};
-    Object.entries(window.PROVINCE_CODES).forEach(([n, c]) => {
-      codeToName[c] = n;
-    });
-
-    const initial = [...locSel.options]
-      .filter((o) => o.selected && window.PROVINCE_CODES[o.textContent])
-      .map((o) => window.PROVINCE_CODES[o.textContent]);
-
-    spainMap = new jsVectorMap({
-      selector: "#map",
-      map: "spain",
-      zoomButtons: false,
-      zoomOnScroll: false,
-      regionsSelectable: true,
-      regionsSelectableOne: false,
-      selectedRegions: initial,
-      regionStyle: {
-        selected: { fill: getComputedStyle(document.documentElement).getPropertyValue("--accent") },
-      },
-    });
-
-    if (typeof spainMap.on === "function") {
-      spainMap.on("region:selected", (code, isSelected) => {
-        const name = codeToName[code];
-        if (!name) return;
-        [...locSel.options].forEach((o) => {
-          if (o.textContent === name) o.selected = isSelected;
-        });
-        autoCalc();
-      });
-    }
-
-    locSel.addEventListener("change", () => {
-      const codes = [...locSel.options]
-        .filter((o) => o.selected && window.PROVINCE_CODES[o.textContent])
-        .map((o) => window.PROVINCE_CODES[o.textContent]);
-      if (spainMap) {
-        spainMap.clearSelectedRegions();
-        spainMap._setSelected("regions", codes);
-      }
-    });
-
-    resetBtn.addEventListener("click", () => {
-      if (spainMap) spainMap.clearSelectedRegions();
-    });
-  }
+  // Previously a jsVectorMap-based mini map allowed province selection.
+  // It has been removed in favor of a simple multi-select list.
 
   // Sync personal metric with the chosen property metric.
   // Price/Down -> savings, Mortgage -> salary
@@ -348,13 +291,6 @@
         [...locSel.options].forEach((o) => {
           o.selected = state.loc.includes(o.value);
         });
-        if (spainMap) {
-          const codes = state.loc
-            .map((name) => window.PROVINCE_CODES[name])
-            .filter(Boolean);
-          spainMap.clearSelectedRegions();
-          spainMap._setSelected("regions", codes);
-        }
       }
       if (state.theme) {
         document.documentElement.dataset.theme = state.theme;
@@ -1166,7 +1102,6 @@ function buildExpenseUI() {
     calc();
   });
 
-  initMap();
   loadState();
   updateSalaryFields();
   updateThemeLabel();
