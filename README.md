@@ -76,7 +76,7 @@ To build a robust housing affordability calculator, consider integrating the fol
 
 - **React** or **Vue.js** for a scalable user interface.
 - **TypeScript** to add static typing to the JavaScript codebase.
-- **Chart.js** for visualizing projections (already used).
+- **Chart.js** for visualizing projections (included locally).
 - **Python** with **Pandas** for data analysis or importing external datasets.
 - **Docker** to standardize development and deployment.
 
