@@ -1,6 +1,7 @@
 /**
  * Housing affordability calculator logic.
- * Updates charts based on user input.
+ * Updates charts automatically as inputs change and
+ * persists selections to localStorage.
  * The required down payment percentage is user configurable.
  * A new metric shows how many years of salary are needed
  * to purchase the selected property.
@@ -182,7 +183,7 @@
     } else if (val === "mortgage") {
       persMetricSel.value = "salary";
     }
-    calc();
+    autoUpdate();
   });
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
@@ -276,6 +277,19 @@
     localStorage.setItem("calcState", JSON.stringify(state));
   }
 
+  function autoUpdate() {
+    saveState();
+    calc();
+  }
+
+  function buildCurveUI() {
+    const yrs = +yrsInput.value;
+    const start = +startYearInput.value;
+    if (!savingsCurve.length || savingsCurve.length !== yrs + 1) {
+      savingsCurve = Array.from({ length: yrs + 1 }, () => +rateInput.value);
+    } else if (savingsCurve.length > yrs + 1) {
+      savingsCurve.length = yrs + 1;
+
 function computeCurve(yrs) {
   savingsCurve = [];
   for (let y = 0; y <= yrs; y++) {
@@ -292,6 +306,30 @@ function computeCurve(yrs) {
       const t = (y - left.year) / (right.year - left.year);
       savingsCurve.push(left.rate + t * (right.rate - left.rate));
     }
+    curveContainer.innerHTML = "";
+    savingsCurve.forEach((val, idx) => {
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      const label = document.createElement("div");
+      label.textContent = val;
+      const input = document.createElement("input");
+      input.type = "range";
+      input.min = 0;
+      input.max = 100;
+      input.step = 1;
+      input.value = val;
+      input.addEventListener("input", () => {
+        label.textContent = input.value;
+        savingsCurve[idx] = +input.value;
+        autoUpdate();
+      });
+      bar.appendChild(label);
+      bar.appendChild(input);
+      const year = document.createElement("div");
+      year.textContent = String(start + idx).slice(-2);
+      bar.appendChild(year);
+      curveContainer.appendChild(bar);
+    });
   }
 }
 
@@ -356,10 +394,31 @@ function buildCurveUI() {
       yrsLabel.textContent = yrsInput.value;
       rateLabel.textContent = rateInput.value;
       buildCurveUI();
-      calc();
+      autoUpdate();
     };
     el.addEventListener("input", handler);
     el.addEventListener("change", handler);
+  });
+
+  [
+    locSel,
+    changeYearInput,
+    newCareerSel,
+    sizeInput,
+    salaryInput,
+    retInput,
+    inflFloorInput,
+    scenarioSel,
+    careerSel,
+    propMetricSel,
+    persMetricSel,
+    initSavingsInput,
+    mortRateInput,
+    mortYearsInput,
+    downPctInput,
+  ].forEach((el) => {
+    el.addEventListener("input", autoUpdate);
+    el.addEventListener("change", autoUpdate);
   });
 
   const palette = [
@@ -693,10 +752,6 @@ function buildCurveUI() {
     URL.revokeObjectURL(a.href);
   }
 
-  document.getElementById("update").addEventListener("click", () => {
-    saveState();
-    calc();
-  });
 
   csvBtn.addEventListener("click", exportCSV);
 
@@ -723,7 +778,7 @@ function buildCurveUI() {
     savingsCurve = [];
     saveNodes = [];
     buildCurveUI();
-    calc();
+    autoUpdate();
   });
 
   loadState();
