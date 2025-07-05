@@ -46,10 +46,19 @@
       }
       .wrap {
         display: grid;
-        grid-template-columns: 290px 1fr;
+        grid-template-columns: 320px 1fr;
         gap: 20px;
         width: 100%;
-        max-width: 1250px;
+        max-width: min(1200px, 90vw);
+        margin: 0 auto;
+      }
+      details {
+        margin-bottom: 10px;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+        margin: 8px 0;
       }
       select,
       input[type="number"],
@@ -81,6 +90,19 @@
         max-height: 120px;
         margin-top: 4px;
       }
+      .hidden {
+        display: none;
+      .chart-container {
+        padding: 30px;
+        margin-top: 20px;
+      }
+      .chart-container canvas {
+        display: block;
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 10px;
+      }
       canvas {
         background: #0f0f0f;
         border-radius: 6px;
@@ -94,10 +116,12 @@
     <button id="themeToggle" style="margin-bottom:10px;">Toggle theme</button>
     <div class="wrap">
       <div class="panel">
-        <label>
-          Locations (Ctrl/Cmd + click to multi-select)
-        </label>
-        <select id="loc" multiple size="14">
+        <details open>
+          <summary>Ubicación</summary>
+          <label>
+            Locations (Ctrl/Cmd + click to multi-select)
+          </label>
+          <select id="loc" multiple size="14">
           <optgroup label="Centro">
             <option value="grupo_Centro">
               Centro (grupo)
@@ -206,77 +230,84 @@
             <option>Ceuta</option>
             <option>Melilla</option>
           </optgroup>
-        </select>
+          </select>
+        </details>
 
-        <label>Año de cambio de empleo</label>
-        <input
-          id="changeYear"
-          type="number"
-          value="2028"
-          min="2025"
-          max="2100"
-        />
+        <details open>
+          <summary>Trabajo y compra</summary>
+          <label>Año de cambio de empleo</label>
+          <input
+            id="changeYear"
+            type="number"
+            value="2028"
+            min="2025"
+            max="2100"
+          />
 
-        <label>Trayectoria tras cambio</label>
-        <select id="newCareer">
-          <option value="stay">⏳ Seguir en empresa actual</option>
-          <option value="odoo">🚀 Cambiar a otro partner Odoo</option>
-          <option value="ai">🤖 Pivotar a IA/Python</option>
-        </select>
+          <label>Trayectoria tras cambio</label>
+          <select id="newCareer">
+            <option value="stay">⏳ Seguir en empresa actual</option>
+            <option value="odoo">🚀 Cambiar a otro partner Odoo</option>
+            <option value="ai">🤖 Pivotar a IA/Python</option>
+          </select>
 
-        <label>
-          Years until purchase:
-          <span id="yrsLabel">2</span>
-        </label>
-        <input
-          id="yrs"
-          type="range"
-          min="1"
-          max="15"
-          value="2"
-        />
+          <label>
+            Years until purchase:
+            <span id="yrsLabel">2</span>
+          </label>
+          <input
+            id="yrs"
+            type="range"
+            min="1"
+            max="15"
+            value="2"
+          />
 
-        <label>Start year</label>
-        <input
-          id="startYear"
-          type="number"
-          value="2025"
-          min="2020"
-          max="2100"
-        />
+          <label>Start year</label>
+          <input
+            id="startYear"
+            type="number"
+            value="2025"
+            min="2020"
+            max="2100"
+          />
+        </details>
 
-        <label>Dwelling size (m²)</label>
-        <input
-          id="size"
-          type="number"
-          value="80"
-          min="30"
-          max="300"
-        />
+        <details open>
+          <summary>Vivienda</summary>
+          <label>Dwelling size (m²)</label>
+          <input
+            id="size"
+            type="number"
+            value="80"
+            min="30"
+            max="300"
+          />
 
-        <label>Tipo de vivienda</label>
-        <select id="dwellingType">
-          <option value="piso">Piso</option>
-          <option value="chalet">Chalet</option>
-          <option value="atico">Ático</option>
-        </select>
+          <label>Tipo de vivienda</label>
+          <select id="dwellingType">
+            <option value="piso">Piso</option>
+            <option value="chalet">Chalet</option>
+            <option value="atico">Ático</option>
+          </select>
 
-        <label>Habitaciones</label>
-        <input
-          id="rooms"
-          type="number"
-          value="3"
-          min="1"
-          max="10"
-        />
+          <label>Habitaciones</label>
+          <input
+            id="rooms"
+            type="number"
+            value="3"
+            min="1"
+            max="10"
+          />
 
-        <label>Extras</label>
-        <div id="extras">
-          <label><input id="garden" type="checkbox" /> Jardín</label>
-          <label><input id="terrace" type="checkbox" /> Terraza</label>
-          <label><input id="patio" type="checkbox" /> Patio</label>
-          <label><input id="basement" type="checkbox" /> Sótano</label>
-        </div>
+          <label>Extras</label>
+          <div id="extras">
+            <label><input id="garden" type="checkbox" /> Jardín</label>
+            <label><input id="terrace" type="checkbox" /> Terraza</label>
+            <label><input id="patio" type="checkbox" /> Patio</label>
+            <label><input id="basement" type="checkbox" /> Sótano</label>
+          </div>
+        </details>
 
         <label>Tipo de salario</label>
         <select id="salaryType">
@@ -286,6 +317,9 @@
 
         <div id="netField">
           <label id="netLabel">Starting net salary (€/month)</label>
+        <details open>
+          <summary>Finanzas personales</summary>
+          <label>Starting net salary (€/month)</label>
           <input
             id="salary"
             type="number"
@@ -307,19 +341,32 @@
           </select>
         </div>
 
+          <label>
+            Savings rate (
+            <span id="rateLabel">40</span>%)
+          </label>
+          <input
+            id="rate"
+            type="range"
+            min="10"
+            max="70"
+            step="5"
+            value="40"
+          />
+          <canvas id="saveCurve" class="curve-editor"></canvas>
+
+        <label><input id="useExpense" type="checkbox" /> Usar gasto fijo</label>
         <label>
-          Savings rate (
-          <span id="rateLabel">40</span>%)
+          Gasto mensual (€): <span id="expenseLabel">800</span>
         </label>
         <input
-          id="rate"
+          id="expense"
           type="range"
-          min="10"
-          max="70"
-          step="5"
-          value="40"
+          min="0"
+          max="3000"
+          step="50"
+          value="800"
         />
-        <canvas id="saveCurve" class="curve-editor"></canvas>
 
         <label>
           Expected annual return on savings (%)
@@ -332,57 +379,71 @@
           min="0"
           max="10"
         />
+          <label>
+            Expected annual return on savings (%)
+          </label>
+          <input
+            id="ret"
+            type="number"
+            value="2"
+            step="0.1"
+            min="0"
+            max="10"
+          />
 
-        <label>
-          Long-term inflation floor (%)
-        </label>
-        <input
-          id="inflFloor"
-          type="number"
-          value="2"
-          step="0.1"
-          min="0"
-          max="5"
-        />
+          <label>
+            Long-term inflation floor (%)
+          </label>
+          <input
+            id="inflFloor"
+            type="number"
+            value="2"
+            step="0.1"
+            min="0"
+            max="5"
+          />
+        </details>
 
-        <label>Market scenario</label>
-        <select id="scenario">
-          <option value="base">
-            Base (histórico)
-          </option>
-          <option value="optimistic">
-            Optimista (IPC +1 %)
-          </option>
-          <option value="pessimistic">
-            Pesimista (pico histórico)
-          </option>
-        </select>
+        <details open>
+          <summary>Escenario y métricas</summary>
+          <label>Market scenario</label>
+          <select id="scenario">
+            <option value="base">
+              Base (histórico)
+            </option>
+            <option value="optimistic">
+              Optimista (IPC +1 %)
+            </option>
+            <option value="pessimistic">
+              Pesimista (pico histórico)
+            </option>
+          </select>
 
-        <label>Career path</label>
-        <select id="career">
-          <option value="stay">
-            ⏳ Seguir en empresa actual
-          </option>
-          <option value="odoo">
-            🚀 Cambiar a otro partner Odoo
-          </option>
-          <option value="ai">
-            🤖 Pivotar a IA/Python
-          </option>
-        </select>
+          <label>Career path</label>
+          <select id="career">
+            <option value="stay">
+              ⏳ Seguir en empresa actual
+            </option>
+            <option value="odoo">
+              🚀 Cambiar a otro partner Odoo
+            </option>
+            <option value="ai">
+              🤖 Pivotar a IA/Python
+            </option>
+          </select>
 
-        <label>Property metric</label>
-        <select id="propMetric">
-          <option value="price">
-            🏠 Precio vivienda
-          </option>
-          <option value="down">
-            💰 Entrada 20%
-          </option>
-          <option value="mortgage">
-            📈 Cuota hipoteca
-          </option>
-        </select>
+          <label>Property metric</label>
+          <select id="propMetric">
+            <option value="price">
+              🏠 Precio vivienda
+            </option>
+            <option value="down">
+              💰 Entrada 20%
+            </option>
+            <option value="mortgage">
+              📈 Cuota hipoteca
+            </option>
+          </select>
 
         <label>Personal metric</label>
         <select id="persMetric">
@@ -399,44 +460,60 @@
             📊 Años de salario
           </option>
         </select>
+          <label>Personal metric</label>
+          <select id="persMetric">
+            <option value="savings">
+              💸 Ahorros acumulados
+            </option>
+            <option value="salary">
+              🪙 Salario neto mensual
+            </option>
+            <option value="ratio">
+              📊 Años de salario
+            </option>
+          </select>
+        </details>
 
-        <label>Initial savings (€)</label>
-        <input
-          id="initSavings"
-          type="number"
-          value="3000"
-          step="100"
-          min="0"
-        />
+        <details open>
+          <summary>Hipoteca</summary>
+          <label>Initial savings (€)</label>
+          <input
+            id="initSavings"
+            type="number"
+            value="3000"
+            step="100"
+            min="0"
+          />
 
-        <label>Mortgage rate (%)</label>
-        <input
-          id="mortRate"
-          type="number"
-          value="3"
-          step="0.1"
-          min="0"
-          max="10"
-        />
+          <label>Mortgage rate (%)</label>
+          <input
+            id="mortRate"
+            type="number"
+            value="3"
+            step="0.1"
+            min="0"
+            max="10"
+          />
 
-        <label>Mortgage term (years)</label>
-        <input
-          id="mortYears"
-          type="number"
-          value="30"
-          min="5"
-          max="40"
-        />
+          <label>Mortgage term (years)</label>
+          <input
+            id="mortYears"
+            type="number"
+            value="30"
+            min="5"
+            max="40"
+          />
 
-        <label>Down payment (%)</label>
-        <input
-          id="downPct"
-          type="number"
-          value="20"
-          step="1"
-          min="5"
-          max="60"
-        />
+          <label>Down payment (%)</label>
+          <input
+            id="downPct"
+            type="number"
+            value="20"
+            step="1"
+            min="5"
+            max="60"
+          />
+        </details>
 
         <button
           id="update"
@@ -474,7 +551,7 @@
         </p>
       </div>
 
-      <div class="panel">
+      <div class="panel chart-container">
         <canvas id="chart" height="300"></canvas>
       </div>
     </div>

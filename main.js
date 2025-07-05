@@ -16,6 +16,9 @@
  * Users can choose dwelling type, number of rooms and extras such as
  * garden or terrace. These options are saved for later but currently
  * do not affect the calculation.
+ * The curve resets when adjusting the savings slider so the equalizer
+ * reflects the new percentage instantly. A fixed monthly expense can
+ * replace the savings rate when "Usar gasto fijo" is enabled.
 */
 (() => {
   "use strict";
@@ -181,6 +184,9 @@
   const rateInput = document.getElementById("rate");
   const rateLabel = document.getElementById("rateLabel");
   const curveContainer = document.getElementById("saveCurve");
+  const expenseInput = document.getElementById("expense");
+  const expenseLabel = document.getElementById("expenseLabel");
+  const useExpenseChk = document.getElementById("useExpense");
   const retInput = document.getElementById("ret");
   const inflFloorInput = document.getElementById("inflFloor");
   const scenarioSel = document.getElementById("scenario");
@@ -247,6 +253,8 @@
     periods: periodsInput.value,
     irpf: irpfSelect.value,
     rate: rateInput.value,
+    expense: expenseInput.value,
+    useExpense: useExpenseChk.checked,
     ret: retInput.value,
     inflFloor: inflFloorInput.value,
     downPct: downPctInput.value,
@@ -344,12 +352,27 @@ function computeCurve(yrs) {
 function buildCurveUI() {
   const yrs = +yrsInput.value;
   const base = +rateInput.value;
-  if (!saveNodes.length || saveNodes.at(-1).year !== yrs) {
+  if (useExpenseChk.checked) {
+    curveContainer.classList.add("hidden");
+    if (curveChart) {
+      curveChart.destroy();
+      curveChart = null;
+    }
+    savingsCurve = [];
+    return;
+  }
+  curveContainer.classList.remove("hidden");
+  if (
+    !saveNodes.length ||
+    saveNodes.at(-1).year !== yrs ||
+    base !== buildCurveUI.base
+  ) {
     saveNodes = [
       { year: 0, rate: base },
       { year: yrs, rate: base },
     ];
   }
+  buildCurveUI.base = base;
   computeCurve(yrs);
   const labels = Array.from({ length: yrs + 1 }, (_, i) => i);
   if (curveChart) {
@@ -398,10 +421,11 @@ function buildCurveUI() {
   });
 }
 
-  [yrsInput, rateInput, startYearInput].forEach((el) => {
+  [yrsInput, rateInput, startYearInput, expenseInput, useExpenseChk].forEach((el) => {
     const handler = () => {
       yrsLabel.textContent = yrsInput.value;
       rateLabel.textContent = rateInput.value;
+      expenseLabel.textContent = expenseInput.value;
       buildCurveUI();
       autoCalc();
     };
@@ -411,12 +435,20 @@ function buildCurveUI() {
 
   const autoFields = [
     locSel,
+    typeSel,
+    roomsInput,
+    gardenChk,
+    terraceChk,
+    patioChk,
+    basementChk,
     sizeInput,
     salaryInput,
     salaryTypeSel,
     grossInput,
     periodsInput,
     irpfSelect,
+    expenseInput,
+    useExpenseChk,
     retInput,
     inflFloorInput,
     scenarioSel,
@@ -524,6 +556,8 @@ function buildCurveUI() {
     const saveRates = savingsCurve.length
       ? savingsCurve.map((v) => v / 100)
       : Array.from({ length: yrs + 1 }, () => +rateInput.value / 100);
+    const useExpense = useExpenseChk.checked;
+    const expense = +expenseInput.value;
     const ret = +retInput.value / 100;
     const inflFloor = +inflFloorInput.value / 100;
     const downPct = +downPctInput.value / 100;
@@ -555,8 +589,12 @@ function buildCurveUI() {
       }
       salaryArr.push(Math.round(net));
       stash *= 1 + ret;
-      const sr = saveRates[y] ?? saveRates[saveRates.length - 1];
-      stash += net * sr * 12;
+      if (useExpense) {
+        stash += Math.max((net - expense) * 12, 0);
+      } else {
+        const sr = saveRates[y] ?? saveRates[saveRates.length - 1];
+        stash += net * sr * 12;
+      }
       savingsArr.push(Math.round(stash));
     }
 
@@ -843,6 +881,7 @@ function buildCurveUI() {
   loadState();
   updateSalaryFields();
   updateThemeLabel();
+  expenseLabel.textContent = expenseInput.value;
   buildCurveUI();
   calc();
 })();
