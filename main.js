@@ -21,6 +21,8 @@
  * replace the savings rate when "Usar gasto fijo" is enabled.
  * Moving a curve node propagates its value to all future years so
  * the trajectory remains smooth without abrupt jumps.
+ * Dataset labels are now drawn next to the end of each line for
+ * easier identification without relying solely on the legend.
 */
 (() => {
   "use strict";
@@ -491,6 +493,27 @@ function buildCurveUI() {
     "#f97316",
     "#ef4444",
   ];
+
+  const lineLabelPlugin = {
+    id: "lineLabel",
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      ctx.save();
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = `${Chart.defaults.font.size}px ${Chart.defaults.font.family}`;
+      chart.getSortedVisibleDatasetMetas().forEach((meta) => {
+        const ds = meta.dataset;
+        const point = meta.data[meta.data.length - 1];
+        if (point) {
+          ctx.fillStyle = ds.borderColor || "#e5e5e5";
+          ctx.fillText(ds.label, point.x + 6, point.y);
+        }
+      });
+      ctx.restore();
+    },
+  };
+  Chart.register(lineLabelPlugin);
   let chart;
   let lastCalc;
   let savingsCurve = [];
@@ -534,8 +557,6 @@ function buildCurveUI() {
   /**
    * Calculate projection data and update the chart.
    * The starting year is configurable via the "startYear" input.
-   * When both savings and down-payment metrics are active,
-   * an additional dataset shows the gap and the year the goal is reached.
    */
   function calc() {
     const raw = [...locSel.selectedOptions].map((o) => o.value);
@@ -729,13 +750,7 @@ function buildCurveUI() {
       if (reachIdx >= 0) {
         gapYear = labels[reachIdx];
       }
-      datasets.push({
-        label: `Gap savings vs ${downPct * 100}% down €`,
-        data: gapData.map((v) => Math.round(v)),
-        borderColor: "#fb923c",
-        tension: 0.2,
-        borderWidth: 2,
-      });
+      // The gap curve has been removed. It now only informs the goal year.
     }
 
     if (persMetric === "ratio" && datasets.length > 1) {
