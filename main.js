@@ -9,6 +9,8 @@
  * The equalizer automatically resizes when the years-until-purchase
  * slider changes and shows two-digit year labels. The bar container
  * scrolls horizontally when many years are displayed.
+ * Any change in the interface recalculates the projection automatically
+ * and persists the state via browser storage.
 */
 (() => {
   "use strict";
@@ -175,6 +177,11 @@
 
   // Sync personal metric with the chosen property metric.
   // Price/Down -> savings, Mortgage -> salary
+  function autoCalc() {
+    saveState();
+    calc();
+  }
+
   propMetricSel.addEventListener("change", () => {
     const val = propMetricSel.value;
     if (val === "price" || val === "down") {
@@ -182,7 +189,7 @@
     } else if (val === "mortgage") {
       persMetricSel.value = "salary";
     }
-    calc();
+    autoCalc();
   });
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
@@ -261,7 +268,8 @@
 
   /**
    * Save current settings, including theme selection and starting year,
-   * to localStorage.
+   * to localStorage. This runs whenever an input changes so the
+   * latest state survives page reloads.
    */
   function saveState() {
     const state = {};
@@ -348,6 +356,7 @@ function buildCurveUI() {
     computeCurve(yrs);
     curveChart.data.datasets[0].data = savingsCurve;
     curveChart.update();
+    autoCalc();
   });
 }
 
@@ -356,10 +365,31 @@ function buildCurveUI() {
       yrsLabel.textContent = yrsInput.value;
       rateLabel.textContent = rateInput.value;
       buildCurveUI();
-      calc();
+      autoCalc();
     };
     el.addEventListener("input", handler);
     el.addEventListener("change", handler);
+  });
+
+  const autoFields = [
+    locSel,
+    sizeInput,
+    salaryInput,
+    retInput,
+    inflFloorInput,
+    scenarioSel,
+    careerSel,
+    changeYearInput,
+    newCareerSel,
+    persMetricSel,
+    initSavingsInput,
+    mortRateInput,
+    mortYearsInput,
+    downPctInput,
+  ];
+  autoFields.forEach((el) => {
+    el.addEventListener("input", autoCalc);
+    el.addEventListener("change", autoCalc);
   });
 
   const palette = [
@@ -693,10 +723,8 @@ function buildCurveUI() {
     URL.revokeObjectURL(a.href);
   }
 
-  document.getElementById("update").addEventListener("click", () => {
-    saveState();
-    calc();
-  });
+  // Manual trigger retained for compatibility but no longer required.
+  document.getElementById("update").addEventListener("click", autoCalc);
 
   csvBtn.addEventListener("click", exportCSV);
 
