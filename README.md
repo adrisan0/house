@@ -1,9 +1,9 @@
 # house
 
-This project contains a housing affordability calculator. It is recommended to
-serve the repository with a local HTTP server and open `index.html` from that
-address. Loading the file directly with `file://` can prevent the mini map from
-initializing correctly.
+This project contains a housing affordability calculator. You can simply open
+`index.html` in your browser, although serving it with a local HTTP server is
+still recommended. The page styles are now kept in `style.css`, which introduces
+new fonts, colors and transitions for a cleaner look.
 
 Launch a server from the project root with:
 
@@ -27,7 +27,8 @@ saved instantly so the state persists across sessions.
 The required down payment percentage is now configurable. When viewing savings
 against the chosen down payment, you see both curves to check if your savings
 will cover the payment within the projection period. The summary indicates the
-year this goal is reached.
+year this goal is reached. Down-payment curves appear faded until your savings
+exceed the required amount so the intersection year is easier to spot.
 You can also display the number of salary years needed to purchase a property
 via the new "Años de salario" metric.
 Net salary can now be calculated from gross annual income. Select the salary
@@ -37,7 +38,14 @@ savings alongside the accumulated amount.
 
 The interface now offers a dropdown to choose the dwelling type and
 controls for rooms and optional extras (jardín, terraza, patio o sótano).
-These selections are stored but no price adjustments are applied yet.
+These selections now modify the projected price using predefined
+multipliers for each feature.
+
+Default multipliers:
+- **Chalet** → +25 % sobre el precio base del piso.
+- **Ático** → +15 %.
+- Cada habitación por encima de 3 añade un 5 % (o resta si hay menos).
+- Extras: jardín +7 %, terraza +5 %, patio +3 % y sótano +4 %.
 
 The control panel groups related fields in expandable sections for a
 Estas se muestran colapsadas por defecto para reducir el desorden.
@@ -51,6 +59,9 @@ after volver a cargar la página.
 
 Job hopping can now be modeled by selecting a change year and future career
 path. Salary growth switches to the new trajectory from that year onward.
+The "Seguir en empresa actual" path assumes a starting gross salary of
+21 000 € with raises of 2 000 € every 18 months up to a ceiling of
+30 000 €.
 The savings rate editor now uses an interactive curve. Click on a year to add
 a node and drag it vertically to adjust the rate. The node follows the mouse
 for smooth real-time feedback. When a node is moved, all later years inherit
@@ -66,14 +77,14 @@ To build a robust housing affordability calculator, consider integrating the fol
 
 - **React** or **Vue.js** for a scalable user interface.
 - **TypeScript** to add static typing to the JavaScript codebase.
-- **Chart.js** for visualizing projections (already used).
+- **Chart.js** for visualizing projections (included locally).
 - **Python** with **Pandas** for data analysis or importing external datasets.
 - **Docker** to standardize development and deployment.
 
 The main application logic now resides in `main.js`, which is loaded from `index.html`.
 All Spanish provinces are available through `provinces.js`, allowing price projections for any province.
-You can also pick provinces on a mini map of Spain (Canary Islands included), and your choices persist across sessions.
-The application now supports offline use thanks to a service worker (sw.js) that caches key assets when the page loads. Map files are now precached as well so the mini map works without a connection.
+Province selection uses only a multi-select list for simplicity.
+The application still supports offline use thanks to a service worker (`sw.js`) that caches key assets when the page loads. The Chart.js library is bundled in the repository as `chart.umd.js` and also cached so the graphs render sin conexión.
 
 A new command-line script `housing_calc.py` replicates the calculator logic for
 batch projections. Run `python housing_calc.py --help` to see available options

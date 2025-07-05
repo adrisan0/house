@@ -14,8 +14,8 @@
  * Any change in the interface recalculates the projection automatically
  * and persists the state via browser storage.
  * Users can choose dwelling type, number of rooms and extras such as
- * garden or terrace. These options are saved for later but currently
- * do not affect the calculation.
+ * garden or terrace. These selections now modify the projected price
+ * through predefined multipliers.
  * The constant savings slider has been removed; the curve alone controls
  * the rate. When "Usar gasto fijo" is enabled, a second curve adjusts the
  * monthly expense instead of a slider.
@@ -168,10 +168,24 @@
     ],
   };
 
+  // Salary growth schedules. The "stay" path now models €2,000 raises every
+  // 18 months starting from €21,000 up to a maximum of €30,000.
   const CAREERS = {
-    stay: { growth: [0.05, 0.03, 0.02] },
+    stay: {
+      growth: [0, 0.095238, 0.086957, 0, 0.08, 0.074074, 0, 0.034483, 0],
+    },
     odoo: { growth: [0.1, 0.05, 0.03] },
     ai: { growth: [0.15, 0.08, 0.04] },
+  };
+
+  const DWELLING_FACTORS = { piso: 1, chalet: 1.25, atico: 1.15 };
+  const ROOMS_BASE = 3;
+  const ROOM_FACTOR = 0.05;
+  const EXTRA_FACTORS = {
+    garden: 0.07,
+    terrace: 0.05,
+    patio: 0.03,
+    basement: 0.04,
   };
 
   /* refs */
@@ -202,67 +216,7 @@
   const newCareerSel = document.getElementById("newCareer");
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
-  const mapContainer = document.getElementById("map");
-  let spainMap;
 
-  /**
-   * Initialize the Spain mini map for province selection.
-   *
-   * When the page is opened directly from the file system some
-   * browsers may not load the vector map library correctly. The
-   * event listener is therefore attached only if the created map
-   * exposes the `on` method.
-   */
-  function initMap() {
-    if (!window.jsVectorMap || !window.PROVINCE_CODES || !mapContainer) return;
-
-    const codeToName = {};
-    Object.entries(window.PROVINCE_CODES).forEach(([n, c]) => {
-      codeToName[c] = n;
-    });
-
-    const initial = [...locSel.options]
-      .filter((o) => o.selected && window.PROVINCE_CODES[o.textContent])
-      .map((o) => window.PROVINCE_CODES[o.textContent]);
-
-    spainMap = new jsVectorMap({
-      selector: "#map",
-      map: "spain",
-      zoomButtons: false,
-      zoomOnScroll: false,
-      regionsSelectable: true,
-      regionsSelectableOne: false,
-      selectedRegions: initial,
-      regionStyle: {
-        selected: { fill: getComputedStyle(document.documentElement).getPropertyValue("--accent") },
-      },
-    });
-
-    if (typeof spainMap.on === "function") {
-      spainMap.on("region:selected", (code, isSelected) => {
-        const name = codeToName[code];
-        if (!name) return;
-        [...locSel.options].forEach((o) => {
-          if (o.textContent === name) o.selected = isSelected;
-        });
-        autoCalc();
-      });
-    }
-
-    locSel.addEventListener("change", () => {
-      const codes = [...locSel.options]
-        .filter((o) => o.selected && window.PROVINCE_CODES[o.textContent])
-        .map((o) => window.PROVINCE_CODES[o.textContent]);
-      if (spainMap) {
-        spainMap.clearSelectedRegions();
-        spainMap._setSelected("regions", codes);
-      }
-    });
-
-    resetBtn.addEventListener("click", () => {
-      if (spainMap) spainMap.clearSelectedRegions();
-    });
-  }
 
   // Sync personal metric with the chosen property metric.
   // Price/Down -> savings, Mortgage -> salary
@@ -353,13 +307,6 @@
         [...locSel.options].forEach((o) => {
           o.selected = state.loc.includes(o.value);
         });
-        if (spainMap) {
-          const codes = state.loc
-            .map((name) => window.PROVINCE_CODES[name])
-            .filter(Boolean);
-          spainMap.clearSelectedRegions();
-          spainMap._setSelected("regions", codes);
-        }
       }
       if (state.theme) {
         document.documentElement.dataset.theme = state.theme;
@@ -385,6 +332,7 @@
       updateSalaryFields();
       buildCurveUI();
       buildExpenseUI();
+
     } catch (_) {
       // ignore broken data
     }
@@ -733,6 +681,22 @@ function buildExpenseUI() {
     "#ef4444",
   ];
 
+  /**
+   * Return a lighter variant of a hex color.
+   * @param {string} hex Original color like "#ff0000".
+   * @param {number} amount Blend ratio with white (0-1).
+   */
+  function lightenColor(hex, amount = 0.5) {
+    const num = parseInt(hex.slice(1), 16);
+    const r = Math.min(255, (num >> 16) + Math.round((255 - (num >> 16)) * amount));
+    const g = Math.min(
+      255,
+      ((num >> 8) & 0xff) + Math.round((255 - ((num >> 8) & 0xff)) * amount),
+    );
+    const b = Math.min(255, (num & 0xff) + Math.round((255 - (num & 0xff)) * amount));
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
   const lineLabelPlugin = {
     id: "lineLabel",
     afterDatasetsDraw(chart) {
@@ -846,7 +810,7 @@ function buildExpenseUI() {
     patio: patioChk.checked,
     basement: basementChk.checked,
   };
-  // Features are currently informational only.
+  // Features modify the base price via predefined multipliers.
 
     const startYear = +startYearInput.value;
     const labels = Array.from({ length: yrs + 1 }, (_, i) => startYear + i);
@@ -904,14 +868,20 @@ function buildExpenseUI() {
 
     let gapYear = null;
 
-    // Helper to build a price array using inflation and floor
-    function priceArrFor(name, infl, floor) {
+    // Helper to build a price array using inflation and feature adjustments
+    function priceArrFor(name, infl, floor, size, type, rooms, extras) {
       const d = LOCATIONS[name];
-      const arr = [d.price * m2];
-      let price = d.price;
+      let base = d.price * (DWELLING_FACTORS[type] || 1);
+      base *= 1 + (rooms - ROOMS_BASE) * ROOM_FACTOR;
+      if (extras.garden) base *= 1 + EXTRA_FACTORS.garden;
+      if (extras.terrace) base *= 1 + EXTRA_FACTORS.terrace;
+      if (extras.patio) base *= 1 + EXTRA_FACTORS.patio;
+      if (extras.basement) base *= 1 + EXTRA_FACTORS.basement;
+      const arr = [base * size];
+      let price = base;
       for (let y = 1; y <= yrs; y++) {
         price *= 1 + inflationFor(y, infl, floor);
-        arr.push(price * m2);
+        arr.push(price * size);
       }
       return arr;
     }
@@ -930,7 +900,7 @@ function buildExpenseUI() {
             : mode === "pessimistic"
               ? d.inflHigh
               : d.inflMid;
-        return priceArrFor(kid, infl, inflFloor);
+        return priceArrFor(kid, infl, inflFloor, m2, dwType, rooms, extras);
       });
       // media elemento a elemento
       const avgPrice = allKidsArr[0].map((_, idx) => {
@@ -952,13 +922,24 @@ function buildExpenseUI() {
         );
         label = `${g.replace("grupo_", "")} mortgage €/mo`;
       }
-      datasets.push({
+      const color = palette[(indiv.length + gi) % palette.length];
+      const ds = {
         label,
         data: propArr,
-        borderColor: palette[(indiv.length + gi) % palette.length],
+        borderColor: color,
         tension: 0.2,
         borderWidth: 2,
-      });
+      };
+      if (propMetric === "down" && persMetric === "savings") {
+        ds.segment = {
+          borderColor: (ctx) => {
+            const idx = ctx.p0DataIndex;
+            const val = ctx.dataset.data[idx];
+            return savingsArr[idx] < val ? lightenColor(color, 0.6) : color;
+          },
+        };
+      }
+      datasets.push(ds);
     });
 
     // procesar individuales
@@ -970,7 +951,7 @@ function buildExpenseUI() {
           : mode === "pessimistic"
             ? d.inflHigh
             : d.inflMid;
-      const priceArr = priceArrFor(name, infl, inflFloor);
+      const priceArr = priceArrFor(name, infl, inflFloor, m2, dwType, rooms, extras);
       let propArr, label;
       const downArr = priceArr.map((v) => v * downPct);
       downMap[name] = downArr;
@@ -986,17 +967,30 @@ function buildExpenseUI() {
         );
         label = `${name} mortgage €/mo`;
       }
-      datasets.push({
+      const color2 = palette[i % palette.length];
+      const ds2 = {
         label,
         data: propArr,
-        borderColor: palette[i % palette.length],
+        borderColor: color2,
         tension: 0.2,
         borderWidth: 2,
-      });
+      };
+      if (propMetric === "down" && persMetric === "savings") {
+        ds2.segment = {
+          borderColor: (ctx) => {
+            const idx = ctx.p0DataIndex;
+            const val = ctx.dataset.data[idx];
+            return savingsArr[idx] < val ? lightenColor(color2, 0.6) : color2;
+          },
+        };
+      }
+      datasets.push(ds2);
     });
 
-    if (propMetric === "down" && persMetric === "savings" && datasets.length > 1) {
-      const downData = datasets[1].data;
+    const propDataset = datasets[1];
+
+    if (propMetric === "down" && persMetric === "savings" && propDataset) {
+      const downData = propDataset.data;
       const gapData = downData.map((v, idx) => savingsArr[idx] - v);
       const reachIdx = gapData.findIndex((v) => v >= 0);
       if (reachIdx >= 0) {
@@ -1005,13 +999,13 @@ function buildExpenseUI() {
       // The gap curve has been removed. It now only informs the goal year.
     }
 
-    if (persMetric === "ratio" && datasets.length > 1) {
-      const priceData = datasets[1].data;
+    if (persMetric === "ratio" && propDataset) {
+      const priceData = propDataset.data;
       const ratioData = priceData.map((v, idx) =>
         Math.round(v / (salaryArr[idx] * 12)),
       );
       datasets.push({
-        label: `${datasets[1].label} / salary yrs`,
+        label: `${propDataset.label} / salary yrs`,
         data: ratioData,
         borderColor: "#facc15",
         tension: 0.2,
@@ -1037,7 +1031,7 @@ function buildExpenseUI() {
     };
 
     // summary y render idéntico al anterior...
-    const propVal = datasets[1].data.at(-1);
+    const propVal = propDataset ? propDataset.data.at(-1) : 0;
     let personalVal;
     if (persMetric === "savings") {
       personalVal = savingsArr.at(-1);
@@ -1172,7 +1166,6 @@ function buildExpenseUI() {
     calc();
   });
 
-  initMap();
   loadState();
   updateSalaryFields();
   updateThemeLabel();

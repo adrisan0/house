@@ -10,8 +10,24 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from typing import Iterable, List
 
+# Salary growth schedules for each career path. The "stay" path now models a
+# fixed raise of €2,000 every 18 months starting from €21,000 and capping at
+# €30,000. Growth values represent the year-over-year increase applied to the
+# previous year's salary.
+STAY_GROWTH_RATES = [
+    0.0,
+    0.095238,
+    0.086957,
+    0.0,
+    0.08,
+    0.074074,
+    0.0,
+    0.034483,
+    0.0,
+]
+
 CAREER_GROWTH = {
-    "stay": [0.05, 0.03, 0.02],
+    "stay": STAY_GROWTH_RATES,
     "odoo": [0.1, 0.05, 0.03],
     "ai": [0.15, 0.08, 0.04],
 }
@@ -50,7 +66,9 @@ def mortgage_payment(principal: float, rate_pct: float, years: int) -> float:
     return (principal * r * (1 + r) ** n) / ((1 + r) ** n - 1)
 
 
-def project_price(base: float, years: int, infl: float, floor: float) -> List[float]:
+def project_price(
+    base: float, years: int, infl: float, floor: float
+) -> List[float]:
     """Return property price projection for a given inflation scenario."""
     values = [base]
     price = base
@@ -61,8 +79,15 @@ def project_price(base: float, years: int, infl: float, floor: float) -> List[fl
 
 
 def growth_for(year: int, career: str) -> float:
-    """Return salary growth based on a predefined career path."""
+    """Return salary growth based on a predefined career path.
+
+    The "stay" path uses a fixed table of annual increases matching
+    €2,000 raises every 18 months from a starting salary of €21,000
+    up to €30,000.
+    """
     schedule = CAREER_GROWTH[career]
+    if career == "stay":
+        return schedule[year] if year < len(schedule) else 0.0
     if year < 5:
         return schedule[0]
     if year < 10:
@@ -119,28 +144,44 @@ def run_projection(params: ProjectionInput) -> None:
     )
     print("Year,Price,Savings,Salary")
     for y in range(params.years + 1):
-        print(
-            f"{y},{prices[y]:.2f},{savings[y]:.2f},{salaries[y]:.2f}"
-        )
+        print(f"{y},{prices[y]:.2f},{savings[y]:.2f},{salaries[y]:.2f}")
 
 
 def parse_args(argv: Iterable[str] | None = None) -> ProjectionInput:
     """Parse command line arguments."""
     parser = ArgumentParser(description="Housing projection CLI")
-    parser.add_argument("--price", type=float, required=True, help="Price per m2")
-    parser.add_argument("--size", type=float, default=1.0, help="Property size")
-    parser.add_argument("--years", type=int, default=10, help="Projection years")
+    parser.add_argument(
+        "--price", type=float, required=True, help="Price per m2"
+    )
+    parser.add_argument(
+        "--size", type=float, default=1.0, help="Property size"
+    )
+    parser.add_argument(
+        "--years", type=int, default=10, help="Projection years"
+    )
     parser.add_argument(
         "--inflation", type=float, default=0.05, help="Base inflation rate"
     )
-    parser.add_argument("--floor", type=float, default=0.02, help="Inflation floor")
-    parser.add_argument("--salary", type=float, default=1500, help="Monthly salary")
-    parser.add_argument("--save-rate", type=float, default=0.1, help="Savings rate")
     parser.add_argument(
-        "--return-rate", type=float, default=0.03, help="Annual return on savings"
+        "--floor", type=float, default=0.02, help="Inflation floor"
     )
     parser.add_argument(
-        "--career", choices=CAREER_GROWTH.keys(), default="stay", help="Career path"
+        "--salary", type=float, default=1500, help="Monthly salary"
+    )
+    parser.add_argument(
+        "--save-rate", type=float, default=0.1, help="Savings rate"
+    )
+    parser.add_argument(
+        "--return-rate",
+        type=float,
+        default=0.03,
+        help="Annual return on savings",
+    )
+    parser.add_argument(
+        "--career",
+        choices=CAREER_GROWTH.keys(),
+        default="stay",
+        help="Career path",
     )
     parser.add_argument(
         "--init-savings", type=float, default=0.0, help="Initial savings"
