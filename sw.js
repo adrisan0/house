@@ -1,4 +1,4 @@
-const CACHE_NAME = 'house-cache-v5';
+const CACHE_NAME = 'house-cache-v6';
 // Precache core files so the app works offline.
 const ASSETS = [
   './',
@@ -6,7 +6,7 @@ const ASSETS = [
   'main.js',
   'style.css',
   'provinces.js',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
+  'chart.umd.js'
 ];
 
 self.addEventListener('install', event => {
