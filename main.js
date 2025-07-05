@@ -222,7 +222,7 @@
     mortYears: mortYearsInput.value,
     initSavings: initSavingsInput.value,
     theme: document.documentElement.dataset.theme || "dark",
-    saveCurve: [],
+    saveNodes: [],
   };
 
   /**
@@ -244,14 +244,14 @@
       }
       updateThemeLabel();
       Object.keys(defaults).forEach((k) => {
-        if (k === "loc" || k === "saveCurve") return;
+        if (k === "loc" || k === "saveNodes") return;
         const el = document.getElementById(k);
         if (el && state[k] !== undefined) {
           el.value = state[k];
         }
       });
-      if (Array.isArray(state.saveCurve)) {
-        savingsCurve = state.saveCurve;
+      if (Array.isArray(state.saveNodes)) {
+        saveNodes = state.saveNodes;
       }
       buildCurveUI();
     } catch (_) {
@@ -267,51 +267,89 @@
     const state = {};
     state.loc = [...locSel.selectedOptions].map((o) => o.value);
     Object.keys(defaults).forEach((k) => {
-      if (k === "loc" || k === "saveCurve") return;
+      if (k === "loc" || k === "saveNodes") return;
       const el = document.getElementById(k);
       if (el) state[k] = el.value;
     });
-    state.saveCurve = savingsCurve;
+    state.saveNodes = saveNodes;
     state.theme = document.documentElement.dataset.theme || "dark";
     localStorage.setItem("calcState", JSON.stringify(state));
   }
 
-  function buildCurveUI() {
-    const yrs = +yrsInput.value;
-    const start = +startYearInput.value;
-    if (!savingsCurve.length || savingsCurve.length !== yrs + 1) {
-      savingsCurve = Array.from({ length: yrs + 1 }, () => +rateInput.value);
-    } else if (savingsCurve.length > yrs + 1) {
-      savingsCurve.length = yrs + 1;
-    } else {
-      while (savingsCurve.length < yrs + 1) {
-        savingsCurve.push(+rateInput.value);
-      }
+function computeCurve(yrs) {
+  savingsCurve = [];
+  for (let y = 0; y <= yrs; y++) {
+    const left = saveNodes.filter((n) => n.year <= y).slice(-1)[0];
+    const right =
+      saveNodes.find((n) => n.year >= y) || left || { year: y, rate: +rateInput.value };
+    if (!left) {
+      savingsCurve.push(right.rate);
+      continue;
     }
-    curveContainer.innerHTML = "";
-    savingsCurve.forEach((val, idx) => {
-      const bar = document.createElement("div");
-      bar.className = "bar";
-      const label = document.createElement("div");
-      label.textContent = val;
-      const input = document.createElement("input");
-      input.type = "range";
-      input.min = 0;
-      input.max = 100;
-      input.step = 1;
-      input.value = val;
-      input.addEventListener("input", () => {
-        label.textContent = input.value;
-        savingsCurve[idx] = +input.value;
-      });
-      bar.appendChild(label);
-      bar.appendChild(input);
-      const year = document.createElement("div");
-      year.textContent = String(start + idx).slice(-2);
-      bar.appendChild(year);
-      curveContainer.appendChild(bar);
-    });
+    if (left.year === right.year) {
+      savingsCurve.push(left.rate);
+    } else {
+      const t = (y - left.year) / (right.year - left.year);
+      savingsCurve.push(left.rate + t * (right.rate - left.rate));
+    }
   }
+}
+
+function buildCurveUI() {
+  const yrs = +yrsInput.value;
+  const base = +rateInput.value;
+  if (!saveNodes.length || saveNodes.at(-1).year !== yrs) {
+    saveNodes = [
+      { year: 0, rate: base },
+      { year: yrs, rate: base },
+    ];
+  }
+  computeCurve(yrs);
+  const labels = Array.from({ length: yrs + 1 }, (_, i) => i);
+  if (curveChart) {
+    curveChart.data.labels = labels;
+    curveChart.data.datasets[0].data = savingsCurve;
+    curveChart.options.scales.x.max = yrs;
+    curveChart.update();
+    return;
+  }
+  curveChart = new Chart(curveContainer, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Save %",
+          data: savingsCurve,
+          borderColor: "#22c55e",
+          tension: 0.4,
+          pointRadius: 4,
+        },
+      ],
+    },
+    options: {
+      animation: false,
+      interaction: { mode: "nearest", intersect: false },
+      scales: { x: { min: 0, max: yrs }, y: { min: 0, max: 100 } },
+    },
+  });
+  curveContainer.addEventListener("click", (evt) => {
+    const x = curveChart.scales.x.getValueForPixel(evt.offsetX);
+    const y = curveChart.scales.y.getValueForPixel(evt.offsetY);
+    const yr = Math.round(Math.min(Math.max(x, 0), yrs));
+    const rate = Math.round(Math.min(Math.max(y, 0), 100));
+    const existing = saveNodes.find((n) => n.year === yr);
+    if (existing) {
+      existing.rate = rate;
+    } else {
+      saveNodes.push({ year: yr, rate });
+      saveNodes.sort((a, b) => a.year - b.year);
+    }
+    computeCurve(yrs);
+    curveChart.data.datasets[0].data = savingsCurve;
+    curveChart.update();
+  });
+}
 
   [yrsInput, rateInput, startYearInput].forEach((el) => {
     const handler = () => {
@@ -341,6 +379,8 @@
   let chart;
   let lastCalc;
   let savingsCurve = [];
+  let saveNodes = [];
+  let curveChart;
 
   function growth(y) {
     const change = +changeYearInput.value - +startYearInput.value;
@@ -681,6 +721,7 @@
     document.documentElement.dataset.theme = defaults.theme;
     updateThemeLabel();
     savingsCurve = [];
+    saveNodes = [];
     buildCurveUI();
     calc();
   });

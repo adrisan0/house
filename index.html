@@ -76,25 +76,10 @@
         margin-top: 10px;
         font-weight: 600;
       }
-      .equalizer {
-        display: flex;
-        align-items: flex-end;
-        gap: 4px;
+      .curve-editor {
+        width: 100%;
+        max-height: 120px;
         margin-top: 4px;
-        overflow-x: auto;
-      }
-      .equalizer .bar {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        font-size: 0.7rem;
-        width: 22px;
-        flex: 0 0 auto;
-      }
-      .equalizer input[type="range"] {
-        writing-mode: bt-lr;
-        -webkit-appearance: slider-vertical;
-        height: 80px;
       }
       canvas {
         background: #0f0f0f;
@@ -288,7 +273,7 @@
           step="5"
           value="40"
         />
-        <div id="saveCurve" class="equalizer"></div>
+        <canvas id="saveCurve" class="curve-editor"></canvas>
 
         <label>
           Expected annual return on savings (%)
