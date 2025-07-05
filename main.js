@@ -4,6 +4,8 @@
  * The required down payment percentage is user configurable.
  * A new metric shows how many years of salary are needed
  * to purchase the selected property.
+ * Salary growth can switch to a new career path from a chosen year,
+ * and a savings curve editor lets users tweak the saving rate per year.
 */
 (() => {
   "use strict";
@@ -158,10 +160,13 @@
   const salaryInput = document.getElementById("salary");
   const rateInput = document.getElementById("rate");
   const rateLabel = document.getElementById("rateLabel");
+  const curveContainer = document.getElementById("saveCurve");
   const retInput = document.getElementById("ret");
   const inflFloorInput = document.getElementById("inflFloor");
   const scenarioSel = document.getElementById("scenario");
   const careerSel = document.getElementById("career");
+  const changeYearInput = document.getElementById("changeYear");
+  const newCareerSel = document.getElementById("newCareer");
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
   const mortRateInput = document.getElementById("mortRate");
@@ -194,12 +199,15 @@
     downPct: downPctInput.value,
     scenario: scenarioSel.value,
     career: careerSel.value,
+    changeYear: changeYearInput.value,
+    newCareer: newCareerSel.value,
     propMetric: propMetricSel.value,
     persMetric: persMetricSel.value,
     mortRate: mortRateInput.value,
     mortYears: mortYearsInput.value,
     initSavings: initSavingsInput.value,
     theme: document.documentElement.dataset.theme || "dark",
+    saveCurve: [],
   };
 
   /**
@@ -221,12 +229,16 @@
       }
       updateThemeLabel();
       Object.keys(defaults).forEach((k) => {
-        if (k === "loc") return;
+        if (k === "loc" || k === "saveCurve") return;
         const el = document.getElementById(k);
         if (el && state[k] !== undefined) {
           el.value = state[k];
         }
       });
+      if (Array.isArray(state.saveCurve)) {
+        savingsCurve = state.saveCurve;
+      }
+      buildCurveUI();
     } catch (_) {
       // ignore broken data
     }
@@ -240,18 +252,57 @@
     const state = {};
     state.loc = [...locSel.selectedOptions].map((o) => o.value);
     Object.keys(defaults).forEach((k) => {
-      if (k === "loc") return;
+      if (k === "loc" || k === "saveCurve") return;
       const el = document.getElementById(k);
       if (el) state[k] = el.value;
     });
+    state.saveCurve = savingsCurve;
     state.theme = document.documentElement.dataset.theme || "dark";
     localStorage.setItem("calcState", JSON.stringify(state));
   }
 
-  [yrsInput, rateInput].forEach((el) => {
+  function buildCurveUI() {
+    const yrs = +yrsInput.value;
+    const start = +startYearInput.value;
+    if (!savingsCurve.length || savingsCurve.length !== yrs + 1) {
+      savingsCurve = Array.from({ length: yrs + 1 }, () => +rateInput.value);
+    } else if (savingsCurve.length > yrs + 1) {
+      savingsCurve.length = yrs + 1;
+    } else {
+      while (savingsCurve.length < yrs + 1) {
+        savingsCurve.push(+rateInput.value);
+      }
+    }
+    curveContainer.innerHTML = "";
+    savingsCurve.forEach((val, idx) => {
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      const label = document.createElement("div");
+      label.textContent = val;
+      const input = document.createElement("input");
+      input.type = "range";
+      input.min = 0;
+      input.max = 100;
+      input.step = 1;
+      input.value = val;
+      input.addEventListener("input", () => {
+        label.textContent = input.value;
+        savingsCurve[idx] = +input.value;
+      });
+      bar.appendChild(label);
+      bar.appendChild(input);
+      const year = document.createElement("div");
+      year.textContent = start + idx;
+      bar.appendChild(year);
+      curveContainer.appendChild(bar);
+    });
+  }
+
+  [yrsInput, rateInput, startYearInput].forEach((el) => {
     el.addEventListener("input", () => {
       yrsLabel.textContent = yrsInput.value;
       rateLabel.textContent = rateInput.value;
+      buildCurveUI();
     });
   });
 
@@ -271,15 +322,18 @@
   ];
   let chart;
   let lastCalc;
+  let savingsCurve = [];
 
   function growth(y) {
-    const g = CAREERS[careerSel.value].growth;
+    const change = +changeYearInput.value - +startYearInput.value;
+    const sched =
+      y >= change ? CAREERS[newCareerSel.value].growth : CAREERS[careerSel.value].growth;
     if (y < 5) {
-      return g[0];
+      return sched[0];
     } else if (y < 10) {
-      return g[1];
+      return sched[1];
     }
-    return g[2];
+    return sched[2];
   }
 
   /**
@@ -328,7 +382,9 @@
     const yrs = +yrsInput.value;
     const m2 = +sizeInput.value;
     const base = +salaryInput.value;
-    const saveRate = +rateInput.value / 100;
+    const saveRates = savingsCurve.length
+      ? savingsCurve.map((v) => v / 100)
+      : Array.from({ length: yrs + 1 }, () => +rateInput.value / 100);
     const ret = +retInput.value / 100;
     const inflFloor = +inflFloorInput.value / 100;
     const downPct = +downPctInput.value / 100;
@@ -351,7 +407,8 @@
       }
       salaryArr.push(Math.round(net));
       stash *= 1 + ret;
-      stash += net * saveRate * 12;
+      const sr = saveRates[y] ?? saveRates[saveRates.length - 1];
+      stash += net * sr * 12;
       savingsArr.push(Math.round(stash));
     }
 
@@ -605,10 +662,13 @@
     });
     document.documentElement.dataset.theme = defaults.theme;
     updateThemeLabel();
+    savingsCurve = [];
+    buildCurveUI();
     calc();
   });
 
   loadState();
   updateThemeLabel();
+  buildCurveUI();
   calc();
 })();

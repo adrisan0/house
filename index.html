@@ -76,6 +76,24 @@
         margin-top: 10px;
         font-weight: 600;
       }
+      .equalizer {
+        display: flex;
+        align-items: flex-end;
+        gap: 4px;
+        margin-top: 4px;
+      }
+      .equalizer .bar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-size: 0.7rem;
+        width: 22px;
+      }
+      .equalizer input[type="range"] {
+        writing-mode: bt-lr;
+        -webkit-appearance: slider-vertical;
+        height: 80px;
+      }
       canvas {
         background: #0f0f0f;
         border-radius: 6px;
@@ -203,6 +221,22 @@
           </optgroup>
         </select>
 
+        <label>Año de cambio de empleo</label>
+        <input
+          id="changeYear"
+          type="number"
+          value="2028"
+          min="2025"
+          max="2100"
+        />
+
+        <label>Trayectoria tras cambio</label>
+        <select id="newCareer">
+          <option value="stay">⏳ Seguir en empresa actual</option>
+          <option value="odoo">🚀 Cambiar a otro partner Odoo</option>
+          <option value="ai">🤖 Pivotar a IA/Python</option>
+        </select>
+
         <label>
           Years until purchase:
           <span id="yrsLabel">2</span>
@@ -252,6 +286,7 @@
           step="5"
           value="40"
         />
+        <div id="saveCurve" class="equalizer"></div>
 
         <label>
           Expected annual return on savings (%)
