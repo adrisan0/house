@@ -43,9 +43,9 @@ after volver a cargar la página.
 Job hopping can now be modeled by selecting a change year and future career
 path. Salary growth switches to the new trajectory from that year onward.
 The savings rate editor now uses an interactive curve. Click on a year to add
-a node and drag it to adjust the rate, allowing smooth changes over time. The
-When a node is moved, all later years inherit its value to keep the curve
-consistent without sudden jumps. The
+a node and drag it vertically to adjust the rate. The node follows the mouse
+for smooth real-time feedback. When a node is moved, all later years inherit
+its value to keep the curve consistent without sudden jumps. The
 chart adapts automatically when the "Years until purchase" value changes.
 When you modify the constant savings slider, the curve resets so the equalizer
 moves in real time. You can also enable a fixed monthly expense by checking
