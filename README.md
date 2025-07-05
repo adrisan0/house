@@ -2,7 +2,8 @@
 
 This project contains a housing affordability calculator. You can simply open
 `index.html` in your browser, although serving it with a local HTTP server is
-still recommended.
+still recommended. The page styles are now kept in `style.css`, which introduces
+new fonts, colors and transitions for a cleaner look.
 
 Launch a server from the project root with:
 
@@ -82,7 +83,7 @@ To build a robust housing affordability calculator, consider integrating the fol
 
 The main application logic now resides in `main.js`, which is loaded from `index.html`.
 All Spanish provinces are available through `provinces.js`, allowing price projections for any province.
-Province selection uses a multi-select list complemented by a small interactive map.
+Province selection uses only a multi-select list for simplicity.
 The application still supports offline use thanks to a service worker (sw.js) that caches key assets when the page loads.
 
 A new command-line script `housing_calc.py` replicates the calculator logic for

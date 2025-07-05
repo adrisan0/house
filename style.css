@@ -1,0 +1,137 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:wght@600&display=swap');
+
+:root {
+    --bg: #0f0f0f;
+    --panel: #181818;
+    --accent: #ff6b6b;
+    --text: #eaeaea;
+    --good: #22c55e;
+    --bad: #ef4444;
+}
+
+:root[data-theme="light"] {
+    --bg: #fafafa;
+    --panel: #ffffff;
+    --accent: #ff6b6b;
+    --text: #222222;
+    --good: #16a34a;
+    --bad: #dc2626;
+}
+
+body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    text-align: center;
+    color: var(--accent);
+}
+
+.wrap {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    width: 100%;
+    max-width: min(1200px, 90vw);
+    margin: 0 auto;
+}
+
+details {
+    margin-bottom: 12px;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: 600;
+    margin: 8px 0;
+}
+
+select,
+input[type="number"],
+input[type="range"],
+button {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background: #0f0f0f;
+    color: var(--text);
+    transition: background 0.3s, color 0.3s;
+}
+
+button {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    font-weight: 600;
+}
+
+button:hover {
+    filter: brightness(1.1);
+}
+
+label {
+    font-size: 0.85rem;
+    display: block;
+    margin: 8px 0 4px;
+}
+
+.panel {
+    background: var(--panel);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.result {
+    margin-top: 10px;
+    font-weight: 600;
+}
+
+.curve-editor {
+    width: 100%;
+    max-height: 120px;
+    margin-top: 4px;
+}
+
+.hidden {
+    display: none;
+}
+
+.chart-container {
+    padding: 30px;
+    margin-top: 20px;
+}
+
+.chart-container canvas {
+    display: block;
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 10px;
+    background: #0f0f0f;
+    border-radius: 6px;
+}
+
+.chart-container table {
+    width: 100%;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    table-layout: fixed;
+}
+
+.chart-container th,
+.chart-container td {
+    text-align: center;
+}

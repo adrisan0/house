@@ -12,6 +12,9 @@
       Housing Affordability – Multi-Location Comparator (v3.3)
     </title>
     <link rel="icon" href="data:,"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="style.css"/>
+    <link rel="stylesheet" href="jsvectormap/jsvectormap.min.css"/>
     <style>
       :root {
         --bg: #121212;
@@ -122,6 +125,8 @@
     </style>
     <script src="chart.umd.js"></script>
     <link rel="stylesheet" href="jsvectormap/jsvectormap.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+    </script>
   </head>
   <body>
     <h1>Housing Affordability – Compare Locations</h1>
@@ -243,7 +248,6 @@
           <option>Melilla</option>
         </optgroup>
         </select>
-          <div id="miniMap" style="height:300px;margin-top:10px;"></div>
       </details>
 
         <details>
@@ -487,7 +491,6 @@
     </div>
 
   <script src="provinces.js"></script>
-  <script src="province_codes.js"></script>
   <script>
     if (
       "serviceWorker" in navigator &&
@@ -498,8 +501,6 @@
       });
     }
   </script>
-  <script src="jsvectormap/jsvectormap.min.js"></script>
-  <script src="jsvectormap/spain.js"></script>
   <script src="main.js"></script>
   </body>
 </html>
