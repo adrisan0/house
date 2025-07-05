@@ -25,11 +25,14 @@ via the new "Años de salario" metric.
 The interface now offers a dropdown to choose the dwelling type and
 controls for rooms and optional extras (jardín, terraza, patio o sótano).
 These selections are stored but no price adjustments are applied yet.
-Any change to them is persisted automatically so the settings remain
-after volver a cargar la página.
 
 The control panel groups related fields in expandable sections for a
-cleaner look, and the page width adapts to the window size.
+cleaner look. The page still adapts to the window size but leaves wider
+margins, and the chart has additional padding with a maximum width of
+700&nbsp;px so it does not dominate the layout.
+
+Any change to them is persisted automatically so the settings remain
+after volver a cargar la página.
 
 
 Job hopping can now be modeled by selecting a change year and future career
