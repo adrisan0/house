@@ -172,6 +172,15 @@
     stay: { growth: [0.05, 0.03, 0.02] },
     odoo: { growth: [0.1, 0.05, 0.03] },
     ai: { growth: [0.15, 0.08, 0.04] },
+    ds: { growth: [0.12, 0.06, 0.04] },
+    aieng: { growth: [0.13, 0.07, 0.05] },
+    llm: { growth: [0.14, 0.08, 0.05] },
+    quantum: { growth: [0.16, 0.09, 0.06] },
+    bio: { growth: [0.11, 0.06, 0.04] },
+    robotics: { growth: [0.12, 0.07, 0.05] },
+    ethics: { growth: [0.08, 0.05, 0.03] },
+    dataeng: { growth: [0.1, 0.06, 0.04] },
+    finance: { growth: [0.13, 0.08, 0.05] },
   };
 
   const STAY_RAISE = 2000; // € raise every 18 months

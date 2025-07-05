@@ -10,10 +10,20 @@ from argparse import ArgumentParser
 from dataclasses import dataclass
 from typing import Iterable, List
 
+# Salary growth schedules for each career path
 CAREER_GROWTH = {
     "stay": [0.05, 0.03, 0.02],
     "odoo": [0.1, 0.05, 0.03],
     "ai": [0.15, 0.08, 0.04],
+    "ds": [0.12, 0.06, 0.04],
+    "aieng": [0.13, 0.07, 0.05],
+    "llm": [0.14, 0.08, 0.05],
+    "quantum": [0.16, 0.09, 0.06],
+    "bio": [0.11, 0.06, 0.04],
+    "robotics": [0.12, 0.07, 0.05],
+    "ethics": [0.08, 0.05, 0.03],
+    "dataeng": [0.1, 0.06, 0.04],
+    "finance": [0.13, 0.08, 0.05],
 }
 
 # Linear raise configuration when staying in the same company
