@@ -20,7 +20,8 @@
  * reflects the new percentage instantly. A fixed monthly expense can
  * replace the savings rate when "Usar gasto fijo" is enabled.
  * Moving a curve node propagates its value to all future years so
- * the trajectory remains smooth without abrupt jumps.
+ * the trajectory remains smooth without abrupt jumps. Nodes now
+ * follow the mouse vertically while dragging for precise control.
  * Dataset labels are now drawn next to the end of each line for
  * easier identification without relying solely on the legend.
 */
@@ -427,6 +428,40 @@ function buildCurveUI() {
     curveChart.update();
     autoCalc();
   });
+
+  curveContainer.addEventListener("mousedown", (evt) => {
+    const x = curveChart.scales.x.getValueForPixel(evt.offsetX);
+    const yrs = +yrsInput.value;
+    const yr = Math.round(Math.min(Math.max(x, 0), yrs));
+    const idx = saveNodes.findIndex((n) => n.year === yr);
+    const pointX = curveChart.scales.x.getPixelForValue(yr);
+    if (Math.abs(evt.offsetX - pointX) > 8 || idx === -1) {
+      return;
+    }
+    draggingIdx = idx;
+    const onMove = (moveEvt) => {
+      if (draggingIdx === null) return;
+      const rect = curveContainer.getBoundingClientRect();
+      const y = moveEvt.clientY - rect.top;
+      const val = curveChart.scales.y.getValueForPixel(y);
+      const rate = Math.round(Math.min(Math.max(val, 0), 100));
+      saveNodes[draggingIdx].rate = rate;
+      for (let i = draggingIdx + 1; i < saveNodes.length; i++) {
+        saveNodes[i].rate = rate;
+      }
+      computeCurve(+yrsInput.value);
+      curveChart.data.datasets[0].data = savingsCurve;
+      curveChart.update();
+      autoCalc();
+    };
+    const onUp = () => {
+      draggingIdx = null;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  });
 }
 
   [yrsInput, rateInput, startYearInput, expenseInput, useExpenseChk].forEach((el) => {
@@ -519,6 +554,7 @@ function buildCurveUI() {
   let savingsCurve = [];
   let saveNodes = [];
   let curveChart;
+  let draggingIdx = null;
 
   function growth(y) {
     const change = +changeYearInput.value - +startYearInput.value;
