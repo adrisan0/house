@@ -46,3 +46,18 @@ The application now supports offline use thanks to a service worker (sw.js) that
 A new command-line script `housing_calc.py` replicates the calculator logic for
 batch projections. Run `python housing_calc.py --help` to see available options
 and output CSV-style tables.
+
+## Historical data
+
+The repository now includes `data/historical_summary.csv` with a short
+retrospective of real figures for Spain (property price, rent and net salary
+from 2007 to 2025). These numbers come from public sources summarized in
+`informe.txt` and can be used for additional context or analysis.
+
+## Interface tweaks
+
+When selecting the property metric, the personal metric adjusts automatically:
+
+- **Precio vivienda** → "Ahorros acumulados"
+- **Entrada** → "Ahorros acumulados"
+- **Cuota hipoteca** → "Salario neto mensual"

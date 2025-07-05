@@ -172,6 +172,18 @@
   const newCareerSel = document.getElementById("newCareer");
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
+
+  // Sync personal metric with the chosen property metric.
+  // Price/Down -> savings, Mortgage -> salary
+  propMetricSel.addEventListener("change", () => {
+    const val = propMetricSel.value;
+    if (val === "price" || val === "down") {
+      persMetricSel.value = "savings";
+    } else if (val === "mortgage") {
+      persMetricSel.value = "salary";
+    }
+    calc();
+  });
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
   const downPctInput = document.getElementById("downPct");
