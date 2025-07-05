@@ -241,7 +241,8 @@
     } else if (val === "mortgage") {
       persMetricSel.value = "salary";
     }
-    autoCalc();
+    // Notify listeners of the updated personal metric and trigger recalculation
+    persMetricSel.dispatchEvent(new Event("change"));
   });
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
@@ -663,6 +664,7 @@ function buildExpenseUI() {
     careerSel,
     changeYearInput,
     newCareerSel,
+    propMetricSel,
     persMetricSel,
     initSavingsInput,
     mortRateInput,
