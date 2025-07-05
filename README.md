@@ -21,6 +21,10 @@ indicates the year your savings cover the payment if it occurs within the
 projection period.
 You can also display the number of salary years needed to purchase a property
 via the new "Años de salario" metric.
+Net salary can now be calculated from gross annual income. Select the salary
+type, pay periods and IRPF rate to derive monthly net pay.
+The personal metric selector adds "Ahorro mensual" to visualize monthly
+savings alongside the accumulated amount.
 
 The interface now offers a dropdown to choose the dwelling type and
 controls for rooms and optional extras (jardín, terraza, patio o sótano).
