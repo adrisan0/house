@@ -24,6 +24,7 @@
  * follow the mouse vertically while dragging for precise control.
  * Dataset labels are now drawn next to the end of each line for
  * easier identification without relying solely on the legend.
+ * Province selection includes a minimal interactive mini map for convenience.
  * Chart animations have been disabled so updates appear instantly.
  * Province selection used to include an interactive mini map. This has
  * been removed for a simpler setup.
@@ -214,14 +215,64 @@
   const newCareerSel = document.getElementById("newCareer");
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
-  // Previously a jsVectorMap-based mini map allowed province selection.
-  // It has been removed in favor of a simple multi-select list.
+
+  // A jsVectorMap mini map complements the multi-select list for province selection.
+  const mapContainer = document.getElementById("miniMap");
+  let miniMap;
+
+  /**
+   * Return jsVectorMap region codes for currently selected provinces.
+   */
+  function selectedCodes() {
+    if (!window.PROVINCE_CODES) return [];
+    return [...locSel.options]
+      .filter((o) => o.selected && window.PROVINCE_CODES[o.value])
+      .map((o) => window.PROVINCE_CODES[o.value]);
+  }
+
+  /**
+   * Initialize the mini map and sync it with the province list.
+   */
+  function initMap() {
+    if (!mapContainer || !window.jsVectorMap) return;
+    miniMap = new jsVectorMap({
+      selector: "#miniMap",
+      map: "spain",
+      zoomButtons: false,
+      regionsSelectable: true,
+      regionsSelectableOne: false,
+      regionStyle: {
+        initial: { fill: "#ccc" },
+        selected: {
+          fill:
+            getComputedStyle(document.documentElement).getPropertyValue(
+              "--accent"
+            ) || "#3b82f6",
+        },
+      },
+      selectedRegions: selectedCodes(),
+    });
+
+    miniMap.on("region-click", function (_, code) {
+      const codes = window.PROVINCE_CODES || {};
+      const name = Object.keys(codes).find((n) => codes[n] === code);
+      if (!name) return;
+      const option = [...locSel.options].find((o) => o.value === name);
+      if (option) {
+        option.selected = !option.selected;
+        autoCalc();
+      }
+    });
+  }
 
   // Sync personal metric with the chosen property metric.
   // Price/Down -> savings, Mortgage -> salary
   function autoCalc() {
     saveState();
     calc();
+    if (miniMap) {
+      miniMap.setSelectedRegions(selectedCodes());
+    }
   }
 
   propMetricSel.addEventListener("change", () => {
@@ -331,6 +382,7 @@
       updateSalaryFields();
       buildCurveUI();
       buildExpenseUI();
+
     } catch (_) {
       // ignore broken data
     }
@@ -1121,6 +1173,7 @@ function buildExpenseUI() {
     expenseNodes = [];
     buildCurveUI();
     buildExpenseUI();
+    initMap();
     calc();
   });
 
@@ -1129,5 +1182,6 @@ function buildExpenseUI() {
   updateThemeLabel();
   buildCurveUI();
   buildExpenseUI();
+  initMap();
   calc();
 })();
