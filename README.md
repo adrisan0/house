@@ -21,6 +21,10 @@ projection period.
 You can also display the number of salary years needed to purchase a property
 via the new "Años de salario" metric.
 
+The interface now offers a dropdown to choose the dwelling type and
+controls for rooms and optional extras (jardín, terraza, patio o sótano).
+These selections are stored but no price adjustments are applied yet.
+
 Job hopping can now be modeled by selecting a change year and future career
 path. Salary growth switches to the new trajectory from that year onward.
 A savings curve editor lets you adjust the saving rate for each projection

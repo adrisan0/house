@@ -269,6 +269,30 @@
           max="300"
         />
 
+        <label>Tipo de vivienda</label>
+        <select id="dwellingType">
+          <option value="piso">Piso</option>
+          <option value="chalet">Chalet</option>
+          <option value="atico">Ático</option>
+        </select>
+
+        <label>Habitaciones</label>
+        <input
+          id="rooms"
+          type="number"
+          value="3"
+          min="1"
+          max="10"
+        />
+
+        <label>Extras</label>
+        <div id="extras">
+          <label><input id="garden" type="checkbox" /> Jardín</label>
+          <label><input id="terrace" type="checkbox" /> Terraza</label>
+          <label><input id="patio" type="checkbox" /> Patio</label>
+          <label><input id="basement" type="checkbox" /> Sótano</label>
+        </div>
+
         <label>Starting net salary (€/month)</label>
         <input
           id="salary"
