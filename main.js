@@ -19,6 +19,8 @@
  * The curve resets when adjusting the savings slider so the equalizer
  * reflects the new percentage instantly. A fixed monthly expense can
  * replace the savings rate when "Usar gasto fijo" is enabled.
+ * Moving a curve node propagates its value to all future years so
+ * the trajectory remains smooth without abrupt jumps.
  * Dataset labels are now drawn next to the end of each line for
  * easier identification without relying solely on the legend.
 */
@@ -409,12 +411,16 @@ function buildCurveUI() {
     const y = curveChart.scales.y.getValueForPixel(evt.offsetY);
     const yr = Math.round(Math.min(Math.max(x, 0), yrs));
     const rate = Math.round(Math.min(Math.max(y, 0), 100));
-    const existing = saveNodes.find((n) => n.year === yr);
-    if (existing) {
-      existing.rate = rate;
+    let idx = saveNodes.findIndex((n) => n.year === yr);
+    if (idx !== -1) {
+      saveNodes[idx].rate = rate;
     } else {
       saveNodes.push({ year: yr, rate });
       saveNodes.sort((a, b) => a.year - b.year);
+      idx = saveNodes.findIndex((n) => n.year === yr);
+    }
+    for (let i = idx + 1; i < saveNodes.length; i++) {
+      saveNodes[i].rate = rate;
     }
     computeCurve(yrs);
     curveChart.data.datasets[0].data = savingsCurve;
