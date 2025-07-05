@@ -309,6 +309,14 @@
           </div>
         </details>
 
+        <label>Tipo de salario</label>
+        <select id="salaryType">
+          <option value="net">Neto mensual</option>
+          <option value="gross">Bruto anual</option>
+        </select>
+
+        <div id="netField">
+          <label id="netLabel">Starting net salary (€/month)</label>
         <details open>
           <summary>Finanzas personales</summary>
           <label>Starting net salary (€/month)</label>
@@ -317,6 +325,21 @@
             type="number"
             value="1450"
           />
+        </div>
+
+        <div id="grossFields" style="display:none">
+          <label>Gross salary per year (€)</label>
+          <input id="gross" type="number" value="25000" />
+          <label>Pay periods</label>
+          <input id="periods" type="number" value="12" />
+          <label>IRPF (%)</label>
+          <select id="irpf">
+            <option value="15">15%</option>
+            <option value="20">20%</option>
+            <option value="25">25%</option>
+            <option value="30">30%</option>
+          </select>
+        </div>
 
           <label>
             Savings rate (
@@ -422,6 +445,21 @@
             </option>
           </select>
 
+        <label>Personal metric</label>
+        <select id="persMetric">
+          <option value="savings">
+            💸 Ahorros acumulados
+          </option>
+          <option value="monthlySavings">
+            💹 Ahorro mensual
+          </option>
+          <option value="salary">
+            🪙 Salario neto mensual
+          </option>
+          <option value="ratio">
+            📊 Años de salario
+          </option>
+        </select>
           <label>Personal metric</label>
           <select id="persMetric">
             <option value="savings">

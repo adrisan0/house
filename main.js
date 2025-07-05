@@ -6,6 +6,8 @@
  * to purchase the selected property.
  * Salary growth can switch to a new career path from a chosen year,
  * and a savings curve editor lets users tweak the saving rate per year.
+ * Salary may be provided net per month or gross per year with IRPF and
+ * pay periods. A new "Monthly savings" personal metric is available.
  * The equalizer automatically resizes when the years-until-purchase
  * slider changes and shows two-digit year labels. The bar container
  * scrolls horizontally when many years are displayed.
@@ -174,6 +176,10 @@
   const terraceChk = document.getElementById("terrace");
   const patioChk = document.getElementById("patio");
   const basementChk = document.getElementById("basement");
+  const salaryTypeSel = document.getElementById("salaryType");
+  const grossInput = document.getElementById("gross");
+  const periodsInput = document.getElementById("periods");
+  const irpfSelect = document.getElementById("irpf");
   const salaryInput = document.getElementById("salary");
   const rateInput = document.getElementById("rate");
   const rateLabel = document.getElementById("rateLabel");
@@ -224,6 +230,12 @@
         : "Light theme";
   }
 
+  function updateSalaryFields() {
+    const showGross = salaryTypeSel.value === "gross";
+    document.getElementById("grossFields").style.display = showGross ? "block" : "none";
+    document.getElementById("netField").style.display = showGross ? "none" : "block";
+  }
+
   const defaults = {
     loc: [],
     yrs: yrsInput.value,
@@ -235,7 +247,11 @@
     terrace: terraceChk.checked,
     patio: patioChk.checked,
     basement: basementChk.checked,
+    salaryType: salaryTypeSel.value,
     salary: salaryInput.value,
+    gross: grossInput.value,
+    periods: periodsInput.value,
+    irpf: irpfSelect.value,
     rate: rateInput.value,
     expense: expenseInput.value,
     useExpense: useExpenseChk.checked,
@@ -287,6 +303,7 @@
       if (Array.isArray(state.saveNodes)) {
         saveNodes = state.saveNodes;
       }
+      updateSalaryFields();
       buildCurveUI();
     } catch (_) {
       // ignore broken data
@@ -426,6 +443,10 @@ function buildCurveUI() {
     basementChk,
     sizeInput,
     salaryInput,
+    salaryTypeSel,
+    grossInput,
+    periodsInput,
+    irpfSelect,
     expenseInput,
     useExpenseChk,
     retInput,
@@ -443,6 +464,11 @@ function buildCurveUI() {
   autoFields.forEach((el) => {
     el.addEventListener("input", autoCalc);
     el.addEventListener("change", autoCalc);
+  });
+
+  salaryTypeSel.addEventListener("change", () => {
+    updateSalaryFields();
+    autoCalc();
   });
 
   const palette = [
@@ -522,7 +548,11 @@ function buildCurveUI() {
 
     const yrs = +yrsInput.value;
     const m2 = +sizeInput.value;
-    const base = +salaryInput.value;
+    const base =
+      salaryTypeSel.value === "net"
+        ? +salaryInput.value
+        : (+grossInput.value / +periodsInput.value) *
+          (1 - +irpfSelect.value / 100);
     const saveRates = savingsCurve.length
       ? savingsCurve.map((v) => v / 100)
       : Array.from({ length: yrs + 1 }, () => +rateInput.value / 100);
@@ -575,6 +605,15 @@ function buildCurveUI() {
         label: "Savings €",
         data: savingsArr,
         borderColor: "#22c55e",
+        tension: 0.2,
+        borderWidth: 2,
+      });
+    } else if (persMetric === "monthlySavings") {
+      const monthly = salaryArr.map((s, i) => Math.round(s * saveRates[i]));
+      datasets.push({
+        label: "Monthly savings €",
+        data: monthly,
+        borderColor: "#a3e635",
         tension: 0.2,
         borderWidth: 2,
       });
@@ -717,8 +756,14 @@ function buildCurveUI() {
 
     // summary y render idéntico al anterior...
     const propVal = datasets[1].data.at(-1);
-    const personalVal =
-      persMetric === "savings" ? savingsArr.at(-1) : salaryArr.at(-1);
+    let personalVal;
+    if (persMetric === "savings") {
+      personalVal = savingsArr.at(-1);
+    } else if (persMetric === "monthlySavings") {
+      personalVal = Math.round(salaryArr.at(-1) * saveRates.at(-1));
+    } else {
+      personalVal = salaryArr.at(-1);
+    }
     let summaryHTML = "";
     if (propMetric === "down") {
       const ok = personalVal >= propVal;
@@ -726,7 +771,11 @@ function buildCurveUI() {
         `Necesitas ${propVal.toLocaleString()}€ ` +
         `para la entrada (${downPct * 100}%).<br>` +
         `${
-          persMetric === "savings" ? "Ahorros" : "Salario"
+          persMetric === "savings"
+            ? "Ahorros"
+            : persMetric === "monthlySavings"
+              ? "Ahorro mensual"
+              : "Salario"
         } tras ${yrs} años: ` +
         `<span style="color:${
           ok ? "var(--good)" : "var(--bad)"
@@ -822,6 +871,7 @@ function buildCurveUI() {
     });
     document.documentElement.dataset.theme = defaults.theme;
     updateThemeLabel();
+    updateSalaryFields();
     savingsCurve = [];
     saveNodes = [];
     buildCurveUI();
@@ -829,6 +879,7 @@ function buildCurveUI() {
   });
 
   loadState();
+  updateSalaryFields();
   updateThemeLabel();
   expenseLabel.textContent = expenseInput.value;
   buildCurveUI();
