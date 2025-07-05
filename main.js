@@ -2,6 +2,8 @@
  * Housing affordability calculator logic.
  * Updates charts based on user input.
  * The required down payment percentage is user configurable.
+ * A new metric shows how many years of salary are needed
+ * to purchase the selected property.
 */
 (() => {
   "use strict";
@@ -473,6 +475,20 @@
         label: `Gap savings vs ${downPct * 100}% down €`,
         data: gapData.map((v) => Math.round(v)),
         borderColor: "#fb923c",
+        tension: 0.2,
+        borderWidth: 2,
+      });
+    }
+
+    if (persMetric === "ratio" && datasets.length > 1) {
+      const priceData = datasets[1].data;
+      const ratioData = priceData.map((v, idx) =>
+        Math.round(v / (salaryArr[idx] * 12)),
+      );
+      datasets.push({
+        label: `${datasets[1].label} / salary yrs`,
+        data: ratioData,
+        borderColor: "#facc15",
         tension: 0.2,
         borderWidth: 2,
       });

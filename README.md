@@ -18,6 +18,8 @@ The required down payment percentage is now configurable. When viewing savings
 against the chosen down payment, the chart displays a "gap" line. The summary
 indicates the year your savings cover the payment if it occurs within the
 projection period.
+You can also display the number of salary years needed to purchase a property
+via the new "Años de salario" metric.
 
 ## Professional Tools & Libraries
 
@@ -32,3 +34,7 @@ To build a robust housing affordability calculator, consider integrating the fol
 The main application logic now resides in `main.js`, which is loaded from `index.html`.
 All Spanish provinces are available through `provinces.js`, allowing price projections for any province.
 The application now supports offline use thanks to a service worker (sw.js) that caches key assets when the page loads.
+
+A new command-line script `housing_calc.py` replicates the calculator logic for
+batch projections. Run `python housing_calc.py --help` to see available options
+and output CSV-style tables.
