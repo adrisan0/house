@@ -731,6 +731,22 @@ function buildExpenseUI() {
     "#ef4444",
   ];
 
+  /**
+   * Return a lighter variant of a hex color.
+   * @param {string} hex Original color like "#ff0000".
+   * @param {number} amount Blend ratio with white (0-1).
+   */
+  function lightenColor(hex, amount = 0.5) {
+    const num = parseInt(hex.slice(1), 16);
+    const r = Math.min(255, (num >> 16) + Math.round((255 - (num >> 16)) * amount));
+    const g = Math.min(
+      255,
+      ((num >> 8) & 0xff) + Math.round((255 - ((num >> 8) & 0xff)) * amount),
+    );
+    const b = Math.min(255, (num & 0xff) + Math.round((255 - (num & 0xff)) * amount));
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
   const lineLabelPlugin = {
     id: "lineLabel",
     afterDatasetsDraw(chart) {
@@ -956,13 +972,24 @@ function buildExpenseUI() {
         );
         label = `${g.replace("grupo_", "")} mortgage €/mo`;
       }
-      datasets.push({
+      const color = palette[(indiv.length + gi) % palette.length];
+      const ds = {
         label,
         data: propArr,
-        borderColor: palette[(indiv.length + gi) % palette.length],
+        borderColor: color,
         tension: 0.2,
         borderWidth: 2,
-      });
+      };
+      if (propMetric === "down" && persMetric === "savings") {
+        ds.segment = {
+          borderColor: (ctx) => {
+            const idx = ctx.p0DataIndex;
+            const val = ctx.dataset.data[idx];
+            return savingsArr[idx] < val ? lightenColor(color, 0.6) : color;
+          },
+        };
+      }
+      datasets.push(ds);
     });
 
     // procesar individuales
@@ -990,13 +1017,24 @@ function buildExpenseUI() {
         );
         label = `${name} mortgage €/mo`;
       }
-      datasets.push({
+      const color2 = palette[i % palette.length];
+      const ds2 = {
         label,
         data: propArr,
-        borderColor: palette[i % palette.length],
+        borderColor: color2,
         tension: 0.2,
         borderWidth: 2,
-      });
+      };
+      if (propMetric === "down" && persMetric === "savings") {
+        ds2.segment = {
+          borderColor: (ctx) => {
+            const idx = ctx.p0DataIndex;
+            const val = ctx.dataset.data[idx];
+            return savingsArr[idx] < val ? lightenColor(color2, 0.6) : color2;
+          },
+        };
+      }
+      datasets.push(ds2);
     });
 
     if (propMetric === "down" && persMetric === "savings" && datasets.length > 1) {
