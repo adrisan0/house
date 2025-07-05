@@ -21,6 +21,11 @@ projection period.
 You can also display the number of salary years needed to purchase a property
 via the new "Años de salario" metric.
 
+Job hopping can now be modeled by selecting a change year and future career
+path. Salary growth switches to the new trajectory from that year onward.
+A savings curve editor lets you adjust the saving rate for each projection
+year using a set of vertical sliders, similar to an audio equalizer.
+
 ## Professional Tools & Libraries
 
 To build a robust housing affordability calculator, consider integrating the following tools:
