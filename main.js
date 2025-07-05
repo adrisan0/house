@@ -6,6 +6,8 @@
  * to purchase the selected property.
  * Salary growth can switch to a new career path from a chosen year,
  * and a savings curve editor lets users tweak the saving rate per year.
+ * The equalizer automatically resizes when the years-until-purchase
+ * slider changes.
 */
 (() => {
   "use strict";
@@ -299,11 +301,14 @@
   }
 
   [yrsInput, rateInput, startYearInput].forEach((el) => {
-    el.addEventListener("input", () => {
+    const handler = () => {
       yrsLabel.textContent = yrsInput.value;
       rateLabel.textContent = rateInput.value;
       buildCurveUI();
-    });
+      calc();
+    };
+    el.addEventListener("input", handler);
+    el.addEventListener("change", handler);
   });
 
   const palette = [
