@@ -227,23 +227,10 @@
   }
 
 
-  // Sync personal metric with the chosen property metric.
-  // Price/Down -> savings, Mortgage -> salary
-  function autoCalc() {
-    saveState();
-    calc();
-  }
-
-  propMetricSel.addEventListener("change", () => {
-    const val = propMetricSel.value;
-    if (val === "price" || val === "down") {
-      persMetricSel.value = "savings";
-    } else if (val === "mortgage") {
-      persMetricSel.value = "salary";
-    }
-    // Notify listeners of the updated personal metric and trigger recalculation
-    persMetricSel.dispatchEvent(new Event("change"));
-  });
+function autoCalc() {
+  saveState();
+  calc();
+}
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
   const downPctInput = document.getElementById("downPct");
@@ -664,8 +651,6 @@ function buildExpenseUI() {
     careerSel,
     changeYearInput,
     newCareerSel,
-    propMetricSel,
-    persMetricSel,
     initSavingsInput,
     mortRateInput,
     mortYearsInput,

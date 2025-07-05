@@ -101,11 +101,6 @@ from 2007 to 2025). These numbers come from public sources summarized in
 
 ## Interface tweaks
 
-When selecting the property metric, the personal metric adjusts automatically:
-
-- **Precio vivienda** → "Ahorros acumulados"
-- **Entrada** → "Ahorros acumulados"
-- **Cuota hipoteca** → "Salario neto mensual"
 - Las líneas del gráfico muestran su nombre de leyenda junto al
   punto final en el extremo derecho.
 - Bajo la gráfica se muestra una tabla con las ubicaciones que se pueden
