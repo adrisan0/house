@@ -23,11 +23,9 @@ via the new "Años de salario" metric.
 
 Job hopping can now be modeled by selecting a change year and future career
 path. Salary growth switches to the new trajectory from that year onward.
-A savings curve editor lets you adjust the saving rate for each projection
-year using a set of vertical sliders, similar to an audio equalizer.
-These sliders now resize automatically when the "Years until purchase" value changes.
-The equalizer is responsive with horizontal scroll and labels use two-digit years
-to save space.
+The savings rate editor now uses an interactive curve. Click on a year to add
+a node and drag it to adjust the rate, allowing smooth changes over time. The
+chart adapts automatically when the "Years until purchase" value changes.
 
 ## Professional Tools & Libraries
 
