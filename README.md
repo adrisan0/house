@@ -25,6 +25,8 @@ The "Update" button returns so you decide when to recompute the graphs. Fields n
 longer refresh the chart on every change, but your selections are saved instantly so the
 state persists across sessions. Los campos numéricos aceptan tanto punto como coma para
 los decimales.
+Al seleccionar una ubicación por primera vez se genera la gráfica de forma
+automática para evitar que la página aparezca vacía.
 The required down payment percentage is now configurable. When viewing savings
 against the chosen down payment, you see both curves to check if your savings
 will cover the payment within the projection period. The summary indicates the

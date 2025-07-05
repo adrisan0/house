@@ -231,6 +231,12 @@
   // Price/Down -> savings, Mortgage -> salary
   function autoCalc() {
     saveState();
+    if (
+      !chart &&
+      Array.from(locSel.selectedOptions).length > 0
+    ) {
+      calc();
+    }
   }
 
   propMetricSel.addEventListener("change", () => {
