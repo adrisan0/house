@@ -840,8 +840,6 @@ function buildCurveUI() {
     URL.revokeObjectURL(a.href);
   }
 
-  // Manual trigger retained for compatibility but no longer required.
-  document.getElementById("update").addEventListener("click", autoCalc);
 
   csvBtn.addEventListener("click", exportCSV);
 
