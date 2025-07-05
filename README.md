@@ -26,7 +26,8 @@ saved instantly so the state persists across sessions.
 The required down payment percentage is now configurable. When viewing savings
 against the chosen down payment, you see both curves to check if your savings
 will cover the payment within the projection period. The summary indicates the
-year this goal is reached.
+year this goal is reached. Down-payment curves appear faded until your savings
+exceed the required amount so the intersection year is easier to spot.
 You can also display the number of salary years needed to purchase a property
 via the new "Años de salario" metric.
 Net salary can now be calculated from gross annual income. Select the salary
