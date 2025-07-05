@@ -36,7 +36,14 @@ savings alongside the accumulated amount.
 
 The interface now offers a dropdown to choose the dwelling type and
 controls for rooms and optional extras (jardín, terraza, patio o sótano).
-These selections are stored but no price adjustments are applied yet.
+These selections now modify the projected price using predefined
+multipliers for each feature.
+
+Default multipliers:
+- **Chalet** → +25 % sobre el precio base del piso.
+- **Ático** → +15 %.
+- Cada habitación por encima de 3 añade un 5 % (o resta si hay menos).
+- Extras: jardín +7 %, terraza +5 %, patio +3 % y sótano +4 %.
 
 The control panel groups related fields in expandable sections for a
 Estas se muestran colapsadas por defecto para reducir el desorden.
@@ -97,3 +104,5 @@ When selecting the property metric, the personal metric adjusts automatically:
 - Bajo la gráfica se muestra una tabla con las ubicaciones que se pueden
   costear cada año. Para aparecer en la tabla la entrada estimada debe
   estar dentro de un 8% arriba o abajo del ahorro acumulado de ese año.
+- Las animaciones de las gráficas se han desactivado para que la
+  actualización sea instantánea.
