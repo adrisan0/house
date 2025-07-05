@@ -217,6 +217,29 @@
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
 
+  /**
+   * Convert user input to a number supporting comma decimals.
+   * @param {string|number} value Raw value from an input element.
+   * @returns {number} Parsed floating-point number or 0 on failure.
+   */
+  function toNum(value) {
+    if (typeof value === "number") {
+      return value;
+    }
+    let str = String(value).trim();
+    if (!str) return 0;
+    str = str.replace(/\s+/g, "");
+    const hasComma = str.includes(",");
+    const hasDot = str.includes(".");
+    if (hasComma && hasDot) {
+      // "1.234,56" -> 1234.56
+      str = str.replace(/\./g, "").replace(",", ".");
+    } else if (hasComma) {
+      str = str.replace(",", ".");
+    }
+    return parseFloat(str) || 0;
+  }
+
 
   // Sync personal metric with the chosen property metric.
   // Price/Down -> savings, Mortgage -> salary
@@ -402,7 +425,7 @@ function computeExpenseCurve(yrs) {
 }
 
 function buildCurveUI() {
-  const yrs = +yrsInput.value;
+  const yrs = toNum(yrsInput.value);
   const base = saveNodes[0]?.rate ?? defaults.rate;
   if (useExpenseChk.checked) {
     curveContainer.classList.add("hidden");
@@ -478,7 +501,7 @@ function buildCurveUI() {
 
   curveContainer.addEventListener("mousedown", (evt) => {
     const x = curveChart.scales.x.getValueForPixel(evt.offsetX);
-    const yrs = +yrsInput.value;
+    const yrs = toNum(yrsInput.value);
     const yr = Math.round(Math.min(Math.max(x, 0), yrs));
     const idx = saveNodes.findIndex((n) => n.year === yr);
     const pointX = curveChart.scales.x.getPixelForValue(yr);
@@ -496,7 +519,7 @@ function buildCurveUI() {
       for (let i = draggingIdx + 1; i < saveNodes.length; i++) {
         saveNodes[i].rate = rate;
       }
-      computeCurve(+yrsInput.value);
+      computeCurve(toNum(yrsInput.value));
       curveChart.data.datasets[0].data = savingsCurve;
       curveChart.update();
       autoCalc();
@@ -512,7 +535,7 @@ function buildCurveUI() {
 }
 
 function buildExpenseUI() {
-  const yrs = +yrsInput.value;
+  const yrs = toNum(yrsInput.value);
   if (!useExpenseChk.checked) {
     expenseCurveContainer.classList.add("hidden");
     if (expenseChart) {
@@ -603,7 +626,7 @@ function buildExpenseUI() {
       for (let i = expenseDraggingIdx + 1; i < expenseNodes.length; i++) {
         expenseNodes[i].val = v;
       }
-      computeExpenseCurve(+yrsInput.value);
+      computeExpenseCurve(toNum(yrsInput.value));
       expenseChart.data.datasets[0].data = expenseCurve;
       expenseChart.update();
       autoCalc();
@@ -729,7 +752,7 @@ function buildExpenseUI() {
   let expenseDraggingIdx = null;
 
   function growth(y) {
-    const change = +changeYearInput.value - +startYearInput.value;
+    const change = toNum(changeYearInput.value) - toNum(startYearInput.value);
     const sched =
       y >= change ? CAREERS[newCareerSel.value].growth : CAREERS[careerSel.value].growth;
     if (y < 5) {
@@ -781,13 +804,13 @@ function buildExpenseUI() {
       return;
     }
 
-    const yrs = +yrsInput.value;
-    const m2 = +sizeInput.value;
+    const yrs = toNum(yrsInput.value);
+    const m2 = toNum(sizeInput.value);
     const base =
       salaryTypeSel.value === "net"
-        ? +salaryInput.value
-        : (+grossInput.value / +periodsInput.value) *
-          (1 - +irpfSelect.value / 100);
+        ? toNum(salaryInput.value)
+        : (toNum(grossInput.value) / toNum(periodsInput.value)) *
+          (1 - toNum(irpfSelect.value) / 100);
     const saveRates = savingsCurve.length
       ? savingsCurve.map((v) => v / 100)
       : Array.from({ length: yrs + 1 }, () => defaults.rate / 100);
@@ -795,15 +818,15 @@ function buildExpenseUI() {
     const expenseRates = expenseCurve.length
       ? expenseCurve
       : Array.from({ length: yrs + 1 }, () => defaults.expense);
-    const ret = +retInput.value / 100;
-    const inflFloor = +inflFloorInput.value / 100;
-    const downPct = +downPctInput.value / 100;
+    const ret = toNum(retInput.value) / 100;
+    const inflFloor = toNum(inflFloorInput.value) / 100;
+    const downPct = toNum(downPctInput.value) / 100;
     const propMetric = propMetricSel.value;
     const persMetric = persMetricSel.value;
-  const mortRate = +mortRateInput.value;
-  const mortYears = +mortYearsInput.value;
+  const mortRate = toNum(mortRateInput.value);
+  const mortYears = toNum(mortYearsInput.value);
   const dwType = typeSel.value;
-  const rooms = +roomsInput.value;
+  const rooms = toNum(roomsInput.value);
   const extras = {
     garden: gardenChk.checked,
     terrace: terraceChk.checked,
@@ -812,11 +835,11 @@ function buildExpenseUI() {
   };
   // Features modify the base price via predefined multipliers.
 
-    const startYear = +startYearInput.value;
+    const startYear = toNum(startYearInput.value);
     const labels = Array.from({ length: yrs + 1 }, (_, i) => startYear + i);
 
     // personal metrics
-    let stash = +initSavingsInput.value;
+    let stash = toNum(initSavingsInput.value);
     let net = base;
     const savingsArr = [];
     const salaryArr = [];
