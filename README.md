@@ -1,7 +1,15 @@
 # house
 
-This project contains a housing affordability calculator. Open `index.html` in a
-browser to use it.
+This project contains a housing affordability calculator. It is recommended to
+serve the repository with a local HTTP server and open `index.html` from that
+address. Loading the file directly with `file://` can prevent the mini map from
+initializing correctly.
+
+Launch a server from the project root with:
+
+```bash
+python3 -m http.server
+```
 
 The estimator now applies a dynamic inflation model when projecting property
 prices. Inflation starts at the chosen scenario rate and gradually decreases

@@ -205,6 +205,11 @@
 
   /**
    * Initialize the Spain mini map for province selection.
+   *
+   * When the page is opened directly from the file system some
+   * browsers may not load the vector map library correctly. The
+   * event listener is therefore attached only if the created map
+   * exposes the `on` method.
    */
   function initMap() {
     if (!window.jsVectorMap || !window.PROVINCE_CODES || !mapContainer) return;
@@ -231,14 +236,16 @@
       },
     });
 
-    spainMap.on("region:selected", (code, isSelected) => {
-      const name = codeToName[code];
-      if (!name) return;
-      [...locSel.options].forEach((o) => {
-        if (o.textContent === name) o.selected = isSelected;
+    if (typeof spainMap.on === "function") {
+      spainMap.on("region:selected", (code, isSelected) => {
+        const name = codeToName[code];
+        if (!name) return;
+        [...locSel.options].forEach((o) => {
+          if (o.textContent === name) o.selected = isSelected;
+        });
+        autoCalc();
       });
-      autoCalc();
-    });
+    }
 
     locSel.addEventListener("change", () => {
       const codes = [...locSel.options]
