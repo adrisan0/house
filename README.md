@@ -85,6 +85,7 @@ The main application logic now resides in `main.js`, which is loaded from `index
 All Spanish provinces are available through `provinces.js`, allowing price projections for any province.
 Province selection uses only a multi-select list for simplicity.
 The application still supports offline use thanks to a service worker (sw.js) that caches key assets when the page loads.
+Chart.js se carga desde el archivo `chart.umd.js`, de modo que la página funciona sin conexión.
 
 A new command-line script `housing_calc.py` replicates the calculator logic for
 batch projections. Run `python housing_calc.py --help` to see available options
