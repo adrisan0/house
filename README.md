@@ -21,10 +21,10 @@ input field. The calculator now remembers your selections using browser
 storage, with a "Reset" button to clear them. A "Toggle theme" control lets
 you switch between dark and light modes, and your preference is saved.
 You can now export the latest projection to a CSV file using the "Download CSV" button.
-The old "Update" button has been removed since changes recalc and save automatically.
-All fields update the chart automatically as soon as you modify them. Your selections are
-saved instantly so the state persists across sessions. Los campos numéricos aceptan tanto
-punto como coma para los decimales.
+The "Update" button returns so you decide when to recompute the graphs. Fields no
+longer refresh the chart on every change, but your selections are saved instantly so the
+state persists across sessions. Los campos numéricos aceptan tanto punto como coma para
+los decimales.
 The required down payment percentage is now configurable. When viewing savings
 against the chosen down payment, you see both curves to check if your savings
 will cover the payment within the projection period. The summary indicates the
@@ -66,8 +66,9 @@ The "Seguir en empresa actual" path assumes a starting gross salary of
 The savings rate editor now uses an interactive curve. Click on a year to add
 a node and drag it vertically to adjust the rate. The node follows the mouse
 for smooth real-time feedback. When a node is moved, all later years inherit
-its value to keep the curve consistent without sudden jumps. The
-chart adapts automatically when the "Years until purchase" value changes.
+its value to keep the curve consistent without sudden jumps. The curve
+editor updates immediately, but you must press **Update** when the "Years
+until purchase" value changes for the main chart to reflect it.
 The former savings rate slider has been removed as the curve performs that role.
 You can still enable a fixed monthly expense via "Usar gasto fijo". The expense
 amount is now set through a second curve instead of a slider.

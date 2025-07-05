@@ -11,8 +11,8 @@
  * The equalizer automatically resizes when the years-until-purchase
  * slider changes and shows two-digit year labels. The bar container
  * scrolls horizontally when many years are displayed.
- * Any change in the interface recalculates the projection automatically
- * and persists the state via browser storage.
+ * Press the "Update" button to refresh the projection after making changes.
+ * Settings still persist automatically via browser storage.
  * Users can choose dwelling type, number of rooms and extras such as
  * garden or terrace. These selections now modify the projected price
  * through predefined multipliers.
@@ -231,7 +231,6 @@
   // Price/Down -> savings, Mortgage -> salary
   function autoCalc() {
     saveState();
-    calc();
   }
 
   propMetricSel.addEventListener("change", () => {
@@ -241,7 +240,7 @@
     } else if (val === "mortgage") {
       persMetricSel.value = "salary";
     }
-    // Notify listeners of the updated personal metric and trigger recalculation
+    // Notify listeners of the updated personal metric
     persMetricSel.dispatchEvent(new Event("change"));
   });
   const mortRateInput = document.getElementById("mortRate");
@@ -251,6 +250,7 @@
   const themeToggle = document.getElementById("themeToggle");
   const resetBtn = document.getElementById("reset");
   const csvBtn = document.getElementById("exportCsv");
+  const updateBtn = document.getElementById("updateBtn");
 
   /**
    * Reflect current theme in the toggle button text.
@@ -1149,6 +1149,11 @@ function buildExpenseUI() {
 
 
   csvBtn.addEventListener("click", exportCSV);
+
+  updateBtn.addEventListener("click", () => {
+    saveState();
+    calc();
+  });
 
   themeToggle.addEventListener("click", () => {
     const current = document.documentElement.dataset.theme;
