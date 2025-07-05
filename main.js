@@ -19,6 +19,8 @@
  * The curve resets when adjusting the savings slider so the equalizer
  * reflects the new percentage instantly. A fixed monthly expense can
  * replace the savings rate when "Usar gasto fijo" is enabled.
+ * Dataset labels are now drawn next to the end of each line for
+ * easier identification without relying solely on the legend.
 */
 (() => {
   "use strict";
@@ -485,6 +487,27 @@ function buildCurveUI() {
     "#f97316",
     "#ef4444",
   ];
+
+  const lineLabelPlugin = {
+    id: "lineLabel",
+    afterDatasetsDraw(chart) {
+      const { ctx } = chart;
+      ctx.save();
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.font = `${Chart.defaults.font.size}px ${Chart.defaults.font.family}`;
+      chart.getSortedVisibleDatasetMetas().forEach((meta) => {
+        const ds = meta.dataset;
+        const point = meta.data[meta.data.length - 1];
+        if (point) {
+          ctx.fillStyle = ds.borderColor || "#e5e5e5";
+          ctx.fillText(ds.label, point.x + 6, point.y);
+        }
+      });
+      ctx.restore();
+    },
+  };
+  Chart.register(lineLabelPlugin);
   let chart;
   let lastCalc;
   let savingsCurve = [];
