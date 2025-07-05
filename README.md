@@ -3,7 +3,8 @@
 This project contains a housing affordability calculator. It is recommended to
 serve the repository with a local HTTP server and open `index.html` from that
 address. Loading the file directly with `file://` can prevent the mini map from
-initializing correctly.
+initializing correctly. The map now resizes when the location panel is opened,
+so it also works when the section is collapsed at page load.
 
 Launch a server from the project root with:
 
@@ -72,7 +73,7 @@ To build a robust housing affordability calculator, consider integrating the fol
 
 The main application logic now resides in `main.js`, which is loaded from `index.html`.
 All Spanish provinces are available through `provinces.js`, allowing price projections for any province.
-You can also pick provinces on a mini map of Spain (Canary Islands included), and your choices persist across sessions.
+You can also pick provinces on a mini map of Spain (Canary Islands included), and your choices persist across sessions. The mini map now adjusts when opening the "Ubicación" section, avoiding the previous blank display.
 The application now supports offline use thanks to a service worker (sw.js) that caches key assets when the page loads. Map files are now precached as well so the mini map works without a connection.
 
 A new command-line script `housing_calc.py` replicates the calculator logic for

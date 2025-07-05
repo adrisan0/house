@@ -203,6 +203,7 @@
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
   const mapContainer = document.getElementById("map");
+  const locDetails = document.getElementById("locDetails");
   let spainMap;
 
   /**
@@ -211,7 +212,9 @@
    * When the page is opened directly from the file system some
    * browsers may not load the vector map library correctly. The
    * event listener is therefore attached only if the created map
-   * exposes the `on` method.
+   * exposes the `on` method. If the location panel is collapsed at
+   * load time, the map is resized when that panel opens to ensure
+   * it renders correctly.
    */
   function initMap() {
     if (!window.jsVectorMap || !window.PROVINCE_CODES || !mapContainer) return;
@@ -261,6 +264,18 @@
 
     resetBtn.addEventListener("click", () => {
       if (spainMap) spainMap.clearSelectedRegions();
+    });
+  }
+
+  if (locDetails) {
+    locDetails.addEventListener("toggle", () => {
+      if (locDetails.open) {
+        if (spainMap && typeof spainMap.updateSize === "function") {
+          spainMap.updateSize();
+        } else if (!spainMap) {
+          initMap();
+        }
+      }
     });
   }
 
