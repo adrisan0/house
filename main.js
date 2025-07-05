@@ -24,8 +24,7 @@
  * follow the mouse vertically while dragging for precise control.
  * Dataset labels are now drawn next to the end of each line for
  * easier identification without relying solely on the legend.
- * Province selection used to include an interactive mini map. This has
- * been removed for a simpler setup.
+ * Province selection now relies solely on the multi-select list.
 */
 (() => {
   "use strict";
@@ -199,8 +198,7 @@
   const newCareerSel = document.getElementById("newCareer");
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
-  // Previously a jsVectorMap-based mini map allowed province selection.
-  // It has been removed in favor of a simple multi-select list.
+
 
   // Sync personal metric with the chosen property metric.
   // Price/Down -> savings, Mortgage -> salary
@@ -316,6 +314,7 @@
       updateSalaryFields();
       buildCurveUI();
       buildExpenseUI();
+
     } catch (_) {
       // ignore broken data
     }
