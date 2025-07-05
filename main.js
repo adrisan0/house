@@ -11,6 +11,9 @@
  * scrolls horizontally when many years are displayed.
  * Any change in the interface recalculates the projection automatically
  * and persists the state via browser storage.
+ * Users can choose dwelling type, number of rooms and extras such as
+ * garden or terrace. These options are saved for later but currently
+ * do not affect the calculation.
 */
 (() => {
   "use strict";
@@ -162,6 +165,12 @@
   const yrsLabel = document.getElementById("yrsLabel");
   const startYearInput = document.getElementById("startYear");
   const sizeInput = document.getElementById("size");
+  const typeSel = document.getElementById("dwellingType");
+  const roomsInput = document.getElementById("rooms");
+  const gardenChk = document.getElementById("garden");
+  const terraceChk = document.getElementById("terrace");
+  const patioChk = document.getElementById("patio");
+  const basementChk = document.getElementById("basement");
   const salaryInput = document.getElementById("salary");
   const rateInput = document.getElementById("rate");
   const rateLabel = document.getElementById("rateLabel");
@@ -214,6 +223,12 @@
     yrs: yrsInput.value,
     startYear: startYearInput.value,
     size: sizeInput.value,
+    type: typeSel.value,
+    rooms: roomsInput.value,
+    garden: gardenChk.checked,
+    terrace: terraceChk.checked,
+    patio: patioChk.checked,
+    basement: basementChk.checked,
     salary: salaryInput.value,
     rate: rateInput.value,
     ret: retInput.value,
@@ -254,7 +269,11 @@
         if (k === "loc" || k === "saveNodes") return;
         const el = document.getElementById(k);
         if (el && state[k] !== undefined) {
-          el.value = state[k];
+          if (el.type === "checkbox") {
+            el.checked = state[k];
+          } else {
+            el.value = state[k];
+          }
         }
       });
       if (Array.isArray(state.saveNodes)) {
@@ -277,7 +296,9 @@
     Object.keys(defaults).forEach((k) => {
       if (k === "loc" || k === "saveNodes") return;
       const el = document.getElementById(k);
-      if (el) state[k] = el.value;
+      if (el) {
+        state[k] = el.type === "checkbox" ? el.checked : el.value;
+      }
     });
     state.saveNodes = saveNodes;
     state.theme = document.documentElement.dataset.theme || "dark";
@@ -478,8 +499,17 @@ function buildCurveUI() {
     const downPct = +downPctInput.value / 100;
     const propMetric = propMetricSel.value;
     const persMetric = persMetricSel.value;
-    const mortRate = +mortRateInput.value;
-    const mortYears = +mortYearsInput.value;
+  const mortRate = +mortRateInput.value;
+  const mortYears = +mortYearsInput.value;
+  const dwType = typeSel.value;
+  const rooms = +roomsInput.value;
+  const extras = {
+    garden: gardenChk.checked,
+    terrace: terraceChk.checked,
+    patio: patioChk.checked,
+    basement: basementChk.checked,
+  };
+  // Features are currently informational only.
 
     const startYear = +startYearInput.value;
     const labels = Array.from({ length: yrs + 1 }, (_, i) => startYear + i);
@@ -744,7 +774,13 @@ function buildCurveUI() {
         return;
       }
       const el = document.getElementById(k);
-      if (el) el.value = defaults[k];
+      if (el) {
+        if (el.type === "checkbox") {
+          el.checked = defaults[k];
+        } else {
+          el.value = defaults[k];
+        }
+      }
     });
     document.documentElement.dataset.theme = defaults.theme;
     updateThemeLabel();
