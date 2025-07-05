@@ -28,6 +28,10 @@ These selections are stored but no price adjustments are applied yet.
 Any change to them is persisted automatically so the settings remain
 after volver a cargar la página.
 
+The control panel groups related fields in expandable sections for a
+cleaner look, and the page width adapts to the window size.
+
+
 Job hopping can now be modeled by selecting a change year and future career
 path. Salary growth switches to the new trajectory from that year onward.
 The savings rate editor now uses an interactive curve. Click on a year to add
