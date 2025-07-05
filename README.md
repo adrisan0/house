@@ -32,6 +32,7 @@ controls for rooms and optional extras (jardín, terraza, patio o sótano).
 These selections are stored but no price adjustments are applied yet.
 
 The control panel groups related fields in expandable sections for a
+Estas se muestran colapsadas por defecto para reducir el desorden.
 cleaner look. The page still adapts to the window size but leaves wider
 margins, and the chart has additional padding with a maximum width of
 700&nbsp;px so it does not dominate the layout.
