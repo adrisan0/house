@@ -171,8 +171,12 @@
     ],
   };
 
+  // Salary growth schedules. The "stay" path now models €2,000 raises every
+  // 18 months starting from €21,000 up to a maximum of €30,000.
   const CAREERS = {
-    stay: { growth: [0.05, 0.03, 0.02] },
+    stay: {
+      growth: [0, 0.095238, 0.086957, 0, 0.08, 0.074074, 0, 0.034483, 0],
+    },
     odoo: { growth: [0.1, 0.05, 0.03] },
     ai: { growth: [0.15, 0.08, 0.04] },
   };
