@@ -13,6 +13,7 @@ input field. The calculator now remembers your selections using browser
 storage, with a "Reset" button to clear them. A "Toggle theme" control lets
 you switch between dark and light modes, and your preference is saved.
 You can now export the latest projection to a CSV file using the "Download CSV" button.
+The old "Update" button has been removed since changes recalc and save automatically.
 All fields update the chart automatically as soon as you modify them. Your selections are
 saved instantly so the state persists across sessions.
 The required down payment percentage is now configurable. When viewing savings
