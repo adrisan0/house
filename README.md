@@ -17,9 +17,9 @@ The old "Update" button has been removed since changes recalc and save automatic
 All fields update the chart automatically as soon as you modify them. Your selections are
 saved instantly so the state persists across sessions.
 The required down payment percentage is now configurable. When viewing savings
-against the chosen down payment, the chart displays a "gap" line. The summary
-indicates the year your savings cover the payment if it occurs within the
-projection period.
+against the chosen down payment, you see both curves to check if your savings
+will cover the payment within the projection period. The summary indicates the
+year this goal is reached.
 You can also display the number of salary years needed to purchase a property
 via the new "Años de salario" metric.
 Net salary can now be calculated from gross annual income. Select the salary
