@@ -24,11 +24,16 @@
  * follow the mouse vertically while dragging for precise control.
  * Dataset labels are now drawn next to the end of each line for
  * easier identification without relying solely on the legend.
+ * Chart animations have been disabled so updates appear instantly.
  * Province selection used to include an interactive mini map. This has
  * been removed for a simpler setup.
 */
 (() => {
   "use strict";
+  // Disable global chart animations for instant updates
+  if (window.Chart) {
+    Chart.defaults.animation = false;
+  }
   const LOCATIONS = {
     "La Latina": {
       price: 5100,
@@ -1031,6 +1036,7 @@ function buildExpenseUI() {
       type: "line",
       data: { labels, datasets },
       options: {
+        animation: false,
         plugins: {
           legend: {
             labels: {

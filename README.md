@@ -104,3 +104,5 @@ When selecting the property metric, the personal metric adjusts automatically:
 - Bajo la gráfica se muestra una tabla con las ubicaciones que se pueden
   costear cada año. Para aparecer en la tabla la entrada estimada debe
   estar dentro de un 8% arriba o abajo del ahorro acumulado de ese año.
+- Las animaciones de las gráficas se han desactivado para que la
+  actualización sea instantánea.
