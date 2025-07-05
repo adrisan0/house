@@ -12,8 +12,9 @@ Users can also set their initial savings amount through a new "Initial savings"
 input field. The calculator now remembers your selections using browser
 storage, with a "Reset" button to clear them. A "Toggle theme" control lets
 you switch between dark and light modes, and your preference is saved.
-You can now export the latest projection to a CSV file using the "Download CSV"
-button.
+You can now export the latest projection to a CSV file using the "Download CSV" button.
+All fields update the chart automatically as soon as you modify them. Your selections are
+saved instantly so the state persists across sessions.
 The required down payment percentage is now configurable. When viewing savings
 against the chosen down payment, the chart displays a "gap" line. The summary
 indicates the year your savings cover the payment if it occurs within the
@@ -24,10 +25,15 @@ via the new "Años de salario" metric.
 The interface now offers a dropdown to choose the dwelling type and
 controls for rooms and optional extras (jardín, terraza, patio o sótano).
 These selections are stored but no price adjustments are applied yet.
+
 The control panel groups related fields in expandable sections for a
 cleaner look. The page still adapts to the window size but leaves wider
 margins, and the chart has additional padding with a maximum width of
 700&nbsp;px so it does not dominate the layout.
+
+Any change to them is persisted automatically so the settings remain
+after volver a cargar la página.
+
 
 Job hopping can now be modeled by selecting a change year and future career
 path. Salary growth switches to the new trajectory from that year onward.
