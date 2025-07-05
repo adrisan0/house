@@ -26,6 +26,8 @@ path. Salary growth switches to the new trajectory from that year onward.
 A savings curve editor lets you adjust the saving rate for each projection
 year using a set of vertical sliders, similar to an audio equalizer.
 These sliders now resize automatically when the "Years until purchase" value changes.
+The equalizer is responsive with horizontal scroll and labels use two-digit years
+to save space.
 
 ## Professional Tools & Libraries
 
