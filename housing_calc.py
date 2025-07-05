@@ -16,6 +16,10 @@ CAREER_GROWTH = {
     "ai": [0.15, 0.08, 0.04],
 }
 
+# Linear raise configuration when staying in the same company
+STAY_RAISE = 2000  # € increase every 18 months
+STAY_CAP = 30000   # maximum gross annual salary
+
 
 @dataclass
 class ProjectionInput:
@@ -71,8 +75,21 @@ def growth_for(year: int, career: str) -> float:
 
 
 def project_salary(base: float, years: int, career: str) -> List[float]:
-    """Return projected monthly salary values."""
+    """Return projected monthly salary values.
+
+    The ``stay`` career path now uses a linear raise of 2000 € gross every
+    18 months with a cap of 30,000 € per year.
+    """
+
     values = [base]
+    if career == "stay":
+        base_annual = base * 12
+        for y in range(1, years + 1):
+            raises = (y * 12) // 18
+            annual = min(base_annual + raises * STAY_RAISE, STAY_CAP)
+            values.append(annual / 12)
+        return values
+
     salary = base
     for y in range(1, years + 1):
         salary *= 1 + growth_for(y - 1, career)
@@ -89,13 +106,12 @@ def project_savings(
     init_savings: float,
 ) -> List[float]:
     """Return projected savings balance over time."""
+    salaries = project_salary(base_salary, years, career)
     savings = init_savings
     values = [savings]
-    salary = base_salary
     for y in range(1, years + 1):
-        salary *= 1 + growth_for(y - 1, career)
         savings *= 1 + ret_rate
-        savings += salary * save_rate * 12
+        savings += salaries[y] * save_rate * 12
         values.append(savings)
     return values
 
