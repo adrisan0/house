@@ -14,8 +14,8 @@
  * Any change in the interface recalculates the projection automatically
  * and persists the state via browser storage.
  * Users can choose dwelling type, number of rooms and extras such as
- * garden or terrace. These options are saved for later but currently
- * do not affect the calculation.
+ * garden or terrace. These selections now modify the projected price
+ * through predefined multipliers.
  * The constant savings slider has been removed; the curve alone controls
  * the rate. When "Usar gasto fijo" is enabled, a second curve adjusts the
  * monthly expense instead of a slider.
@@ -25,6 +25,8 @@
  * Dataset labels are now drawn next to the end of each line for
  * easier identification without relying solely on the legend.
  * Chart animations have been disabled so updates appear instantly.
+ * Province selection used to include an interactive mini map. This has
+ * been removed for a simpler setup.
 */
 (() => {
   "use strict";
@@ -174,6 +176,16 @@
     ai: { growth: [0.15, 0.08, 0.04] },
   };
 
+  const DWELLING_FACTORS = { piso: 1, chalet: 1.25, atico: 1.15 };
+  const ROOMS_BASE = 3;
+  const ROOM_FACTOR = 0.05;
+  const EXTRA_FACTORS = {
+    garden: 0.07,
+    terrace: 0.05,
+    patio: 0.03,
+    basement: 0.04,
+  };
+
   /* refs */
   const locSel = document.getElementById("loc");
   const yrsInput = document.getElementById("yrs");
@@ -202,67 +214,8 @@
   const newCareerSel = document.getElementById("newCareer");
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
-  const mapContainer = document.getElementById("map");
-  let spainMap;
-
-  /**
-   * Initialize the Spain mini map for province selection.
-   *
-   * When the page is opened directly from the file system some
-   * browsers may not load the vector map library correctly. The
-   * event listener is therefore attached only if the created map
-   * exposes the `on` method.
-   */
-  function initMap() {
-    if (!window.jsVectorMap || !window.PROVINCE_CODES || !mapContainer) return;
-
-    const codeToName = {};
-    Object.entries(window.PROVINCE_CODES).forEach(([n, c]) => {
-      codeToName[c] = n;
-    });
-
-    const initial = [...locSel.options]
-      .filter((o) => o.selected && window.PROVINCE_CODES[o.textContent])
-      .map((o) => window.PROVINCE_CODES[o.textContent]);
-
-    spainMap = new jsVectorMap({
-      selector: "#map",
-      map: "spain",
-      zoomButtons: false,
-      zoomOnScroll: false,
-      regionsSelectable: true,
-      regionsSelectableOne: false,
-      selectedRegions: initial,
-      regionStyle: {
-        selected: { fill: getComputedStyle(document.documentElement).getPropertyValue("--accent") },
-      },
-    });
-
-    if (typeof spainMap.on === "function") {
-      spainMap.on("region:selected", (code, isSelected) => {
-        const name = codeToName[code];
-        if (!name) return;
-        [...locSel.options].forEach((o) => {
-          if (o.textContent === name) o.selected = isSelected;
-        });
-        autoCalc();
-      });
-    }
-
-    locSel.addEventListener("change", () => {
-      const codes = [...locSel.options]
-        .filter((o) => o.selected && window.PROVINCE_CODES[o.textContent])
-        .map((o) => window.PROVINCE_CODES[o.textContent]);
-      if (spainMap) {
-        spainMap.clearSelectedRegions();
-        spainMap._setSelected("regions", codes);
-      }
-    });
-
-    resetBtn.addEventListener("click", () => {
-      if (spainMap) spainMap.clearSelectedRegions();
-    });
-  }
+  // Previously a jsVectorMap-based mini map allowed province selection.
+  // It has been removed in favor of a simple multi-select list.
 
   // Sync personal metric with the chosen property metric.
   // Price/Down -> savings, Mortgage -> salary
@@ -353,13 +306,6 @@
         [...locSel.options].forEach((o) => {
           o.selected = state.loc.includes(o.value);
         });
-        if (spainMap) {
-          const codes = state.loc
-            .map((name) => window.PROVINCE_CODES[name])
-            .filter(Boolean);
-          spainMap.clearSelectedRegions();
-          spainMap._setSelected("regions", codes);
-        }
       }
       if (state.theme) {
         document.documentElement.dataset.theme = state.theme;
@@ -846,7 +792,7 @@ function buildExpenseUI() {
     patio: patioChk.checked,
     basement: basementChk.checked,
   };
-  // Features are currently informational only.
+  // Features modify the base price via predefined multipliers.
 
     const startYear = +startYearInput.value;
     const labels = Array.from({ length: yrs + 1 }, (_, i) => startYear + i);
@@ -904,14 +850,20 @@ function buildExpenseUI() {
 
     let gapYear = null;
 
-    // Helper to build a price array using inflation and floor
-    function priceArrFor(name, infl, floor) {
+    // Helper to build a price array using inflation and feature adjustments
+    function priceArrFor(name, infl, floor, size, type, rooms, extras) {
       const d = LOCATIONS[name];
-      const arr = [d.price * m2];
-      let price = d.price;
+      let base = d.price * (DWELLING_FACTORS[type] || 1);
+      base *= 1 + (rooms - ROOMS_BASE) * ROOM_FACTOR;
+      if (extras.garden) base *= 1 + EXTRA_FACTORS.garden;
+      if (extras.terrace) base *= 1 + EXTRA_FACTORS.terrace;
+      if (extras.patio) base *= 1 + EXTRA_FACTORS.patio;
+      if (extras.basement) base *= 1 + EXTRA_FACTORS.basement;
+      const arr = [base * size];
+      let price = base;
       for (let y = 1; y <= yrs; y++) {
         price *= 1 + inflationFor(y, infl, floor);
-        arr.push(price * m2);
+        arr.push(price * size);
       }
       return arr;
     }
@@ -930,7 +882,7 @@ function buildExpenseUI() {
             : mode === "pessimistic"
               ? d.inflHigh
               : d.inflMid;
-        return priceArrFor(kid, infl, inflFloor);
+        return priceArrFor(kid, infl, inflFloor, m2, dwType, rooms, extras);
       });
       // media elemento a elemento
       const avgPrice = allKidsArr[0].map((_, idx) => {
@@ -970,7 +922,7 @@ function buildExpenseUI() {
           : mode === "pessimistic"
             ? d.inflHigh
             : d.inflMid;
-      const priceArr = priceArrFor(name, infl, inflFloor);
+      const priceArr = priceArrFor(name, infl, inflFloor, m2, dwType, rooms, extras);
       let propArr, label;
       const downArr = priceArr.map((v) => v * downPct);
       downMap[name] = downArr;
@@ -1172,7 +1124,6 @@ function buildExpenseUI() {
     calc();
   });
 
-  initMap();
   loadState();
   updateSalaryFields();
   updateThemeLabel();
