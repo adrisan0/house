@@ -16,9 +16,9 @@
  * Users can choose dwelling type, number of rooms and extras such as
  * garden or terrace. These options are saved for later but currently
  * do not affect the calculation.
- * The curve resets when adjusting the savings slider so the equalizer
- * reflects the new percentage instantly. A fixed monthly expense can
- * replace the savings rate when "Usar gasto fijo" is enabled.
+ * The constant savings slider has been removed; the curve alone controls
+ * the rate. When "Usar gasto fijo" is enabled, a second curve adjusts the
+ * monthly expense instead of a slider.
  * Moving a curve node propagates its value to all future years so
  * the trajectory remains smooth without abrupt jumps. Nodes now
  * follow the mouse vertically while dragging for precise control.
@@ -186,11 +186,8 @@
   const periodsInput = document.getElementById("periods");
   const irpfSelect = document.getElementById("irpf");
   const salaryInput = document.getElementById("salary");
-  const rateInput = document.getElementById("rate");
-  const rateLabel = document.getElementById("rateLabel");
   const curveContainer = document.getElementById("saveCurve");
-  const expenseInput = document.getElementById("expense");
-  const expenseLabel = document.getElementById("expenseLabel");
+  const expenseCurveContainer = document.getElementById("expenseCurve");
   const useExpenseChk = document.getElementById("useExpense");
   const retInput = document.getElementById("ret");
   const inflFloorInput = document.getElementById("inflFloor");
@@ -311,8 +308,8 @@
     gross: grossInput.value,
     periods: periodsInput.value,
     irpf: irpfSelect.value,
-    rate: rateInput.value,
-    expense: expenseInput.value,
+    rate: 40,
+    expense: 800,
     useExpense: useExpenseChk.checked,
     ret: retInput.value,
     inflFloor: inflFloorInput.value,
@@ -328,6 +325,7 @@
     initSavings: initSavingsInput.value,
     theme: document.documentElement.dataset.theme || "dark",
     saveNodes: [],
+    expenseNodes: [],
   };
 
   /**
@@ -356,7 +354,7 @@
       }
       updateThemeLabel();
       Object.keys(defaults).forEach((k) => {
-        if (k === "loc" || k === "saveNodes") return;
+        if (k === "loc" || k === "saveNodes" || k === "expenseNodes") return;
         const el = document.getElementById(k);
         if (el && state[k] !== undefined) {
           if (el.type === "checkbox") {
@@ -369,8 +367,12 @@
       if (Array.isArray(state.saveNodes)) {
         saveNodes = state.saveNodes;
       }
+      if (Array.isArray(state.expenseNodes)) {
+        expenseNodes = state.expenseNodes;
+      }
       updateSalaryFields();
       buildCurveUI();
+      buildExpenseUI();
     } catch (_) {
       // ignore broken data
     }
@@ -385,13 +387,14 @@
     const state = {};
     state.loc = [...locSel.selectedOptions].map((o) => o.value);
     Object.keys(defaults).forEach((k) => {
-      if (k === "loc" || k === "saveNodes") return;
+      if (k === "loc" || k === "saveNodes" || k === "expenseNodes") return;
       const el = document.getElementById(k);
       if (el) {
         state[k] = el.type === "checkbox" ? el.checked : el.value;
       }
     });
     state.saveNodes = saveNodes;
+    state.expenseNodes = expenseNodes;
     state.theme = document.documentElement.dataset.theme || "dark";
     localStorage.setItem("calcState", JSON.stringify(state));
   }
@@ -401,7 +404,9 @@ function computeCurve(yrs) {
   for (let y = 0; y <= yrs; y++) {
     const left = saveNodes.filter((n) => n.year <= y).slice(-1)[0];
     const right =
-      saveNodes.find((n) => n.year >= y) || left || { year: y, rate: +rateInput.value };
+      saveNodes.find((n) => n.year >= y) ||
+      left ||
+      { year: y, rate: +defaults.rate };
     if (!left) {
       savingsCurve.push(right.rate);
       continue;
@@ -415,9 +420,30 @@ function computeCurve(yrs) {
   }
 }
 
+function computeExpenseCurve(yrs) {
+  expenseCurve = [];
+  for (let y = 0; y <= yrs; y++) {
+    const left = expenseNodes.filter((n) => n.year <= y).slice(-1)[0];
+    const right =
+      expenseNodes.find((n) => n.year >= y) ||
+      left ||
+      { year: y, val: defaults.expense };
+    if (!left) {
+      expenseCurve.push(right.val);
+      continue;
+    }
+    if (left.year === right.year) {
+      expenseCurve.push(left.val);
+    } else {
+      const t = (y - left.year) / (right.year - left.year);
+      expenseCurve.push(left.val + t * (right.val - left.val));
+    }
+  }
+}
+
 function buildCurveUI() {
   const yrs = +yrsInput.value;
-  const base = +rateInput.value;
+  const base = saveNodes[0]?.rate ?? defaults.rate;
   if (useExpenseChk.checked) {
     curveContainer.classList.add("hidden");
     if (curveChart) {
@@ -525,12 +551,118 @@ function buildCurveUI() {
   });
 }
 
-  [yrsInput, rateInput, startYearInput, expenseInput, useExpenseChk].forEach((el) => {
+function buildExpenseUI() {
+  const yrs = +yrsInput.value;
+  if (!useExpenseChk.checked) {
+    expenseCurveContainer.classList.add("hidden");
+    if (expenseChart) {
+      expenseChart.destroy();
+      expenseChart = null;
+    }
+    expenseCurve = [];
+    return;
+  }
+  expenseCurveContainer.classList.remove("hidden");
+  const base = expenseNodes[0]?.val ?? defaults.expense;
+  if (
+    !expenseNodes.length ||
+    expenseNodes.at(-1).year !== yrs ||
+    base !== buildExpenseUI.base
+  ) {
+    expenseNodes = [
+      { year: 0, val: base },
+      { year: yrs, val: base },
+    ];
+  }
+  buildExpenseUI.base = base;
+  computeExpenseCurve(yrs);
+  const labels = Array.from({ length: yrs + 1 }, (_, i) => i);
+  if (expenseChart) {
+    expenseChart.data.labels = labels;
+    expenseChart.data.datasets[0].data = expenseCurve;
+    expenseChart.options.scales.x.max = yrs;
+    expenseChart.update();
+    return;
+  }
+  expenseChart = new Chart(expenseCurveContainer, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Gasto €",
+          data: expenseCurve,
+          borderColor: "#f87171",
+          tension: 0.4,
+          pointRadius: 4,
+        },
+      ],
+    },
+    options: {
+      animation: false,
+      interaction: { mode: "nearest", intersect: false },
+      scales: { x: { min: 0, max: yrs }, y: { min: 0, max: 3000 } },
+    },
+  });
+  expenseCurveContainer.addEventListener("click", (evt) => {
+    const x = expenseChart.scales.x.getValueForPixel(evt.offsetX);
+    const y = expenseChart.scales.y.getValueForPixel(evt.offsetY);
+    const yr = Math.round(Math.min(Math.max(x, 0), yrs));
+    const val = Math.round(Math.min(Math.max(y, 0), 3000));
+    let idx = expenseNodes.findIndex((n) => n.year === yr);
+    if (idx !== -1) {
+      expenseNodes[idx].val = val;
+    } else {
+      expenseNodes.push({ year: yr, val });
+      expenseNodes.sort((a, b) => a.year - b.year);
+      idx = expenseNodes.findIndex((n) => n.year === yr);
+    }
+    for (let i = idx + 1; i < expenseNodes.length; i++) {
+      expenseNodes[i].val = val;
+    }
+    computeExpenseCurve(yrs);
+    expenseChart.data.datasets[0].data = expenseCurve;
+    expenseChart.update();
+    autoCalc();
+  });
+
+  expenseCurveContainer.addEventListener("mousedown", (evt) => {
+    const x = expenseChart.scales.x.getValueForPixel(evt.offsetX);
+    const yr = Math.round(Math.min(Math.max(x, 0), yrs));
+    const idx = expenseNodes.findIndex((n) => n.year === yr);
+    const pointX = expenseChart.scales.x.getPixelForValue(yr);
+    if (Math.abs(evt.offsetX - pointX) > 8 || idx === -1) return;
+    expenseDraggingIdx = idx;
+    const onMove = (moveEvt) => {
+      if (expenseDraggingIdx === null) return;
+      const rect = expenseCurveContainer.getBoundingClientRect();
+      const y = moveEvt.clientY - rect.top;
+      const val = expenseChart.scales.y.getValueForPixel(y);
+      const v = Math.round(Math.min(Math.max(val, 0), 3000));
+      expenseNodes[expenseDraggingIdx].val = v;
+      for (let i = expenseDraggingIdx + 1; i < expenseNodes.length; i++) {
+        expenseNodes[i].val = v;
+      }
+      computeExpenseCurve(+yrsInput.value);
+      expenseChart.data.datasets[0].data = expenseCurve;
+      expenseChart.update();
+      autoCalc();
+    };
+    const onUp = () => {
+      expenseDraggingIdx = null;
+      document.removeEventListener("mousemove", onMove);
+      document.removeEventListener("mouseup", onUp);
+    };
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  });
+}
+
+  [yrsInput, startYearInput, useExpenseChk].forEach((el) => {
     const handler = () => {
       yrsLabel.textContent = yrsInput.value;
-      rateLabel.textContent = rateInput.value;
-      expenseLabel.textContent = expenseInput.value;
       buildCurveUI();
+      buildExpenseUI();
       autoCalc();
     };
     el.addEventListener("input", handler);
@@ -551,7 +683,6 @@ function buildCurveUI() {
     grossInput,
     periodsInput,
     irpfSelect,
-    expenseInput,
     useExpenseChk,
     retInput,
     inflFloorInput,
@@ -616,6 +747,10 @@ function buildCurveUI() {
   let saveNodes = [];
   let curveChart;
   let draggingIdx = null;
+  let expenseCurve = [];
+  let expenseNodes = [];
+  let expenseChart;
+  let expenseDraggingIdx = null;
 
   function growth(y) {
     const change = +changeYearInput.value - +startYearInput.value;
@@ -679,9 +814,11 @@ function buildCurveUI() {
           (1 - +irpfSelect.value / 100);
     const saveRates = savingsCurve.length
       ? savingsCurve.map((v) => v / 100)
-      : Array.from({ length: yrs + 1 }, () => +rateInput.value / 100);
+      : Array.from({ length: yrs + 1 }, () => defaults.rate / 100);
     const useExpense = useExpenseChk.checked;
-    const expense = +expenseInput.value;
+    const expenseRates = expenseCurve.length
+      ? expenseCurve
+      : Array.from({ length: yrs + 1 }, () => defaults.expense);
     const ret = +retInput.value / 100;
     const inflFloor = +inflFloorInput.value / 100;
     const downPct = +downPctInput.value / 100;
@@ -714,7 +851,8 @@ function buildCurveUI() {
       salaryArr.push(Math.round(net));
       stash *= 1 + ret;
       if (useExpense) {
-        stash += Math.max((net - expense) * 12, 0);
+        const exp = expenseRates[y] ?? expenseRates[expenseRates.length - 1];
+        stash += Math.max((net - exp) * 12, 0);
       } else {
         const sr = saveRates[y] ?? saveRates[saveRates.length - 1];
         stash += net * sr * 12;
@@ -1014,7 +1152,10 @@ function buildCurveUI() {
     updateSalaryFields();
     savingsCurve = [];
     saveNodes = [];
+    expenseCurve = [];
+    expenseNodes = [];
     buildCurveUI();
+    buildExpenseUI();
     calc();
   });
 
@@ -1022,7 +1163,7 @@ function buildCurveUI() {
   loadState();
   updateSalaryFields();
   updateThemeLabel();
-  expenseLabel.textContent = expenseInput.value;
   buildCurveUI();
+  buildExpenseUI();
   calc();
 })();

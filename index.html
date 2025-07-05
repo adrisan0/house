@@ -362,32 +362,12 @@
           </select>
         </div>
 
-          <label>
-            Savings rate (
-            <span id="rateLabel">40</span>%)
-          </label>
-          <input
-            id="rate"
-            type="range"
-            min="10"
-            max="70"
-            step="5"
-            value="40"
-          />
+          <label>Savings rate (%)</label>
           <canvas id="saveCurve" class="curve-editor"></canvas>
 
         <label><input id="useExpense" type="checkbox" /> Usar gasto fijo</label>
-        <label>
-          Gasto mensual (€): <span id="expenseLabel">800</span>
-        </label>
-        <input
-          id="expense"
-          type="range"
-          min="0"
-          max="3000"
-          step="50"
-          value="800"
-        />
+        <label>Gasto mensual (€)</label>
+        <canvas id="expenseCurve" class="curve-editor hidden"></canvas>
 
         <label>
           Expected annual return on savings (%)

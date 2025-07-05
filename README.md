@@ -48,9 +48,9 @@ a node and drag it vertically to adjust the rate. The node follows the mouse
 for smooth real-time feedback. When a node is moved, all later years inherit
 its value to keep the curve consistent without sudden jumps. The
 chart adapts automatically when the "Years until purchase" value changes.
-When you modify the constant savings slider, the curve resets so the equalizer
-moves in real time. You can also enable a fixed monthly expense by checking
-"Usar gasto fijo" and adjusting the new slider to set the amount.
+The former savings rate slider has been removed as the curve performs that role.
+You can still enable a fixed monthly expense via "Usar gasto fijo". The expense
+amount is now set through a second curve instead of a slider.
 
 ## Professional Tools & Libraries
 
