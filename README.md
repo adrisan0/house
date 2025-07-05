@@ -12,6 +12,8 @@ Users can also set their initial savings amount through a new "Initial savings"
 input field. The calculator now remembers your selections using browser
 storage, with a "Reset" button to clear them. A "Toggle theme" control lets
 you switch between dark and light modes, and your preference is saved.
+All fields recalculate automatically as soon as you modify them and the
+current state is stored so it persists after reloading the page.
 You can now export the latest projection to a CSV file using the "Download CSV"
 button.
 The required down payment percentage is now configurable. When viewing savings

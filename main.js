@@ -11,7 +11,8 @@
  * scrolls horizontally when many years are displayed.
  * Users can choose dwelling type, number of rooms and extras such as
  * garden or terrace. These options are saved for later but currently
- * do not affect the calculation.
+ * do not affect the calculation. Any change updates the projection
+ * immediately and is stored in browser storage.
 */
 (() => {
   "use strict";
@@ -192,6 +193,7 @@
       persMetricSel.value = "salary";
     }
     calc();
+    saveState();
   });
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
@@ -241,8 +243,8 @@
   };
 
   /**
-   * Load saved user settings from localStorage, if any, including
-   * the interface theme and starting year.
+   * Restore the interface state from localStorage, including theme
+   * and all input values. Invoked on startup.
    */
   function loadState() {
     const raw = localStorage.getItem("calcState");
@@ -279,8 +281,8 @@
   }
 
   /**
-   * Save current settings, including theme selection and starting year,
-   * to localStorage.
+   * Persist current settings to localStorage. This runs automatically
+   * whenever the user changes a control.
    */
   function saveState() {
     const state = {};
@@ -369,6 +371,7 @@ function buildCurveUI() {
     computeCurve(yrs);
     curveChart.data.datasets[0].data = savingsCurve;
     curveChart.update();
+    saveState();
   });
 }
 
@@ -378,6 +381,7 @@ function buildCurveUI() {
       rateLabel.textContent = rateInput.value;
       buildCurveUI();
       calc();
+      saveState();
     };
     el.addEventListener("input", handler);
     el.addEventListener("change", handler);
@@ -403,6 +407,22 @@ function buildCurveUI() {
   let saveNodes = [];
   let curveChart;
 
+  // Attach calc and saveState to all form elements so updates are immediate.
+  function hookAutoUpdate() {
+    const fields = document.querySelectorAll(".panel input, .panel select");
+    fields.forEach((el) => {
+      if (["reset", "exportCsv", "themeToggle"].includes(el.id)) return;
+      if (["yrs", "rate", "startYear"].includes(el.id)) return;
+      el.addEventListener("input", () => {
+        calc();
+        saveState();
+      });
+      el.addEventListener("change", () => {
+        calc();
+        saveState();
+      });
+    });
+  }
   function growth(y) {
     const change = +changeYearInput.value - +startYearInput.value;
     const sched =
@@ -723,10 +743,6 @@ function buildCurveUI() {
     URL.revokeObjectURL(a.href);
   }
 
-  document.getElementById("update").addEventListener("click", () => {
-    saveState();
-    calc();
-  });
 
   csvBtn.addEventListener("click", exportCSV);
 
@@ -761,6 +777,8 @@ function buildCurveUI() {
     buildCurveUI();
     calc();
   });
+
+  hookAutoUpdate();
 
   loadState();
   updateThemeLabel();
