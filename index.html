@@ -11,6 +11,7 @@
     <title>
       Housing Affordability – Multi-Location Comparator (v3.3)
     </title>
+    <link rel="icon" href="data:,"/>
     <style>
       :root {
         --bg: #121212;
@@ -557,7 +558,10 @@
   <script src="provinces.js"></script>
   <script src="province_codes.js"></script>
   <script>
-    if ("serviceWorker" in navigator) {
+    if (
+      "serviceWorker" in navigator &&
+      window.location.protocol.startsWith("http")
+    ) {
       navigator.serviceWorker.register("sw.js").catch(() => {
         console.log("Service worker registration failed");
       });
