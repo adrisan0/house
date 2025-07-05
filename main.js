@@ -223,7 +223,21 @@
    * @returns {number} Parsed floating-point number or 0 on failure.
    */
   function toNum(value) {
-    return parseFloat(String(value).replace(",", ".")) || 0;
+    if (typeof value === "number") {
+      return value;
+    }
+    let str = String(value).trim();
+    if (!str) return 0;
+    str = str.replace(/\s+/g, "");
+    const hasComma = str.includes(",");
+    const hasDot = str.includes(".");
+    if (hasComma && hasDot) {
+      // "1.234,56" -> 1234.56
+      str = str.replace(/\./g, "").replace(",", ".");
+    } else if (hasComma) {
+      str = str.replace(",", ".");
+    }
+    return parseFloat(str) || 0;
   }
 
 
