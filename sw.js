@@ -1,16 +1,12 @@
-const CACHE_NAME = 'house-cache-v4';
-// Precache core files so the app works offline, including map assets
-// required by jsVectorMap.
+const CACHE_NAME = 'house-cache-v6';
+// Precache core files so the app works offline.
 const ASSETS = [
   './',
   'index.html',
   'main.js',
+  'style.css',
   'provinces.js',
-  'province_codes.js',
-  'jsvectormap/jsvectormap.min.js',
-  'jsvectormap/jsvectormap.min.css',
-  'jsvectormap/spain.js',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
+  'chart.umd.js',
 ];
 
 self.addEventListener('install', event => {
