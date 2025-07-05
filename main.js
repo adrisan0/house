@@ -528,8 +528,6 @@ function buildCurveUI() {
   /**
    * Calculate projection data and update the chart.
    * The starting year is configurable via the "startYear" input.
-   * When both savings and down-payment metrics are active,
-   * an additional dataset shows the gap and the year the goal is reached.
    */
   function calc() {
     const raw = [...locSel.selectedOptions].map((o) => o.value);
@@ -723,13 +721,7 @@ function buildCurveUI() {
       if (reachIdx >= 0) {
         gapYear = labels[reachIdx];
       }
-      datasets.push({
-        label: `Gap savings vs ${downPct * 100}% down €`,
-        data: gapData.map((v) => Math.round(v)),
-        borderColor: "#fb923c",
-        tension: 0.2,
-        borderWidth: 2,
-      });
+      // The gap curve has been removed. It now only informs the goal year.
     }
 
     if (persMetric === "ratio" && datasets.length > 1) {
