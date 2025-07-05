@@ -7,7 +7,8 @@
  * Salary growth can switch to a new career path from a chosen year,
  * and a savings curve editor lets users tweak the saving rate per year.
  * The equalizer automatically resizes when the years-until-purchase
- * slider changes.
+ * slider changes and shows two-digit year labels. The bar container
+ * scrolls horizontally when many years are displayed.
 */
 (() => {
   "use strict";
@@ -294,7 +295,7 @@
       bar.appendChild(label);
       bar.appendChild(input);
       const year = document.createElement("div");
-      year.textContent = start + idx;
+      year.textContent = String(start + idx).slice(-2);
       bar.appendChild(year);
       curveContainer.appendChild(bar);
     });
