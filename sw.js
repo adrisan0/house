@@ -5,6 +5,7 @@ const ASSETS = [
   './',
   'index.html',
   'main.js',
+  'style.css',
   'provinces.js',
   'province_codes.js',
   'jsvectormap/jsvectormap.min.js',
