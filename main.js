@@ -766,9 +766,14 @@ function buildExpenseUI() {
     return Math.max(reduced, floor);
   }
 
+  /**
+   * Monthly mortgage payment using the annuity formula.
+   * Returns 0 when the term is zero or negative.
+   */
   function mortPayment(principal, ratePct, years) {
     const r = ratePct / 100 / 12;
     const n = years * 12;
+    if (n <= 0) return 0;
     if (r === 0) {
       return principal / n;
     }

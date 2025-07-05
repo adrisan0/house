@@ -22,6 +22,10 @@ def test_mortgage_payment_zero_rate():
     assert mortgage_payment(120000, 0, 30) == 333.3333333333333
 
 
+def test_mortgage_payment_zero_years():
+    assert mortgage_payment(100000, 3.5, 0) == 0
+
+
 def test_project_price():
     data = project_price(1000, 2, 0.05, 0.02)
     assert len(data) == 3

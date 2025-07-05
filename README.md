@@ -113,3 +113,5 @@ When selecting the property metric, the personal metric adjusts automatically:
   estar dentro de un 8% arriba o abajo del ahorro acumulado de ese año.
 - Las animaciones de las gráficas se han desactivado para que la
   actualización sea instantánea.
+- Si la duración de la hipoteca es 0 años, el cálculo de la cuota devuelve 0
+  para evitar valores infinitos que ocultaban la gráfica.
