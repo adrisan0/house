@@ -14,8 +14,6 @@ storage, with a "Reset" button to clear them. A "Toggle theme" control lets
 you switch between dark and light modes, and your preference is saved.
 You can now export the latest projection to a CSV file using the "Download CSV"
 button.
-All interface changes trigger an immediate recalculation and the state is saved
-automatically, so there's no need for a dedicated "Update" button.
 The required down payment percentage is now configurable. When viewing savings
 against the chosen down payment, the chart displays a "gap" line. The summary
 indicates the year your savings cover the payment if it occurs within the
