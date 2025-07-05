@@ -81,3 +81,5 @@ When selecting the property metric, the personal metric adjusts automatically:
 - **Precio vivienda** → "Ahorros acumulados"
 - **Entrada** → "Ahorros acumulados"
 - **Cuota hipoteca** → "Salario neto mensual"
+- Las líneas del gráfico muestran su nombre de leyenda junto al
+  punto final en el extremo derecho.
