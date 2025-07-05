@@ -418,6 +418,12 @@ function buildCurveUI() {
 
   const autoFields = [
     locSel,
+    typeSel,
+    roomsInput,
+    gardenChk,
+    terraceChk,
+    patioChk,
+    basementChk,
     sizeInput,
     salaryInput,
     expenseInput,
