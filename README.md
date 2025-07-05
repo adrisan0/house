@@ -37,7 +37,14 @@ savings alongside the accumulated amount.
 
 The interface now offers a dropdown to choose the dwelling type and
 controls for rooms and optional extras (jardín, terraza, patio o sótano).
-These selections are stored but no price adjustments are applied yet.
+These selections now modify the projected price using predefined
+multipliers for each feature.
+
+Default multipliers:
+- **Chalet** → +25 % sobre el precio base del piso.
+- **Ático** → +15 %.
+- Cada habitación por encima de 3 añade un 5 % (o resta si hay menos).
+- Extras: jardín +7 %, terraza +5 %, patio +3 % y sótano +4 %.
 
 The control panel groups related fields in expandable sections for a
 Estas se muestran colapsadas por defecto para reducir el desorden.
