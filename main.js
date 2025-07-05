@@ -375,16 +375,18 @@ function computeCurve(yrs) {
     const right =
       saveNodes.find((n) => n.year >= y) ||
       left ||
-      { year: y, rate: +defaults.rate };
+      { year: y, rate: toNum(defaults.rate) };
     if (!left) {
-      savingsCurve.push(right.rate);
+      savingsCurve.push(toNum(right.rate));
       continue;
     }
+    const l = toNum(left.rate);
+    const r = toNum(right.rate);
     if (left.year === right.year) {
-      savingsCurve.push(left.rate);
+      savingsCurve.push(l);
     } else {
       const t = (y - left.year) / (right.year - left.year);
-      savingsCurve.push(left.rate + t * (right.rate - left.rate));
+      savingsCurve.push(l + t * (r - l));
     }
   }
 }
@@ -396,23 +398,25 @@ function computeExpenseCurve(yrs) {
     const right =
       expenseNodes.find((n) => n.year >= y) ||
       left ||
-      { year: y, val: defaults.expense };
+      { year: y, val: toNum(defaults.expense) };
     if (!left) {
-      expenseCurve.push(right.val);
+      expenseCurve.push(toNum(right.val));
       continue;
     }
+    const l = toNum(left.val);
+    const r = toNum(right.val);
     if (left.year === right.year) {
-      expenseCurve.push(left.val);
+      expenseCurve.push(l);
     } else {
       const t = (y - left.year) / (right.year - left.year);
-      expenseCurve.push(left.val + t * (right.val - left.val));
+      expenseCurve.push(l + t * (r - l));
     }
   }
 }
 
 function buildCurveUI() {
   const yrs = toNum(yrsInput.value);
-  const base = saveNodes[0]?.rate ?? defaults.rate;
+  const base = toNum(saveNodes[0]?.rate ?? defaults.rate);
   if (useExpenseChk.checked) {
     curveContainer.classList.add("hidden");
     if (curveChart) {
@@ -532,7 +536,7 @@ function buildExpenseUI() {
     return;
   }
   expenseCurveContainer.classList.remove("hidden");
-  const base = expenseNodes[0]?.val ?? defaults.expense;
+  const base = toNum(expenseNodes[0]?.val ?? defaults.expense);
   if (
     !expenseNodes.length ||
     expenseNodes.at(-1).year !== yrs ||
@@ -762,9 +766,14 @@ function buildExpenseUI() {
     return Math.max(reduced, floor);
   }
 
+  /**
+   * Monthly mortgage payment using the annuity formula.
+   * Returns 0 when the term is zero or negative.
+   */
   function mortPayment(principal, ratePct, years) {
     const r = ratePct / 100 / 12;
     const n = years * 12;
+    if (n <= 0) return 0;
     if (r === 0) {
       return principal / n;
     }
