@@ -31,6 +31,9 @@ path. Salary growth switches to the new trajectory from that year onward.
 The savings rate editor now uses an interactive curve. Click on a year to add
 a node and drag it to adjust the rate, allowing smooth changes over time. The
 chart adapts automatically when the "Years until purchase" value changes.
+When you modify the constant savings slider, the curve resets so the equalizer
+moves in real time. You can also enable a fixed monthly expense by checking
+"Usar gasto fijo" and adjusting the new slider to set the amount.
 
 ## Professional Tools & Libraries
 

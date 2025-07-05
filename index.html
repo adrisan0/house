@@ -81,6 +81,9 @@
         max-height: 120px;
         margin-top: 4px;
       }
+      .hidden {
+        display: none;
+      }
       canvas {
         background: #0f0f0f;
         border-radius: 6px;
@@ -298,6 +301,19 @@
           value="40"
         />
         <canvas id="saveCurve" class="curve-editor"></canvas>
+
+        <label><input id="useExpense" type="checkbox" /> Usar gasto fijo</label>
+        <label>
+          Gasto mensual (€): <span id="expenseLabel">800</span>
+        </label>
+        <input
+          id="expense"
+          type="range"
+          min="0"
+          max="3000"
+          step="50"
+          value="800"
+        />
 
         <label>
           Expected annual return on savings (%)
