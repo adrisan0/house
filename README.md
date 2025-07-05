@@ -65,7 +65,7 @@ To build a robust housing affordability calculator, consider integrating the fol
 The main application logic now resides in `main.js`, which is loaded from `index.html`.
 All Spanish provinces are available through `provinces.js`, allowing price projections for any province.
 You can also pick provinces on a mini map of Spain (Canary Islands included), and your choices persist across sessions.
-The application now supports offline use thanks to a service worker (sw.js) that caches key assets when the page loads.
+The application now supports offline use thanks to a service worker (sw.js) that caches key assets when the page loads. Map files are now precached as well so the mini map works without a connection.
 
 A new command-line script `housing_calc.py` replicates the calculator logic for
 batch projections. Run `python housing_calc.py --help` to see available options
