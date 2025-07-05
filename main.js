@@ -987,8 +987,10 @@ function buildExpenseUI() {
       datasets.push(ds2);
     });
 
-    if (propMetric === "down" && persMetric === "savings" && datasets.length > 1) {
-      const downData = datasets[1].data;
+    const propDataset = datasets[1];
+
+    if (propMetric === "down" && persMetric === "savings" && propDataset) {
+      const downData = propDataset.data;
       const gapData = downData.map((v, idx) => savingsArr[idx] - v);
       const reachIdx = gapData.findIndex((v) => v >= 0);
       if (reachIdx >= 0) {
@@ -997,13 +999,13 @@ function buildExpenseUI() {
       // The gap curve has been removed. It now only informs the goal year.
     }
 
-    if (persMetric === "ratio" && datasets.length > 1) {
-      const priceData = datasets[1].data;
+    if (persMetric === "ratio" && propDataset) {
+      const priceData = propDataset.data;
       const ratioData = priceData.map((v, idx) =>
         Math.round(v / (salaryArr[idx] * 12)),
       );
       datasets.push({
-        label: `${datasets[1].label} / salary yrs`,
+        label: `${propDataset.label} / salary yrs`,
         data: ratioData,
         borderColor: "#facc15",
         tension: 0.2,
@@ -1029,7 +1031,7 @@ function buildExpenseUI() {
     };
 
     // summary y render idéntico al anterior...
-    const propVal = datasets[1].data.at(-1);
+    const propVal = propDataset ? propDataset.data.at(-1) : 0;
     let personalVal;
     if (persMetric === "savings") {
       personalVal = savingsArr.at(-1);
