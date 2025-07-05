@@ -1,6 +1,7 @@
 /**
  * Housing affordability calculator logic.
- * Updates charts based on user input.
+ * Updates charts automatically as inputs change and
+ * persists selections to localStorage.
  * The required down payment percentage is user configurable.
  * A new metric shows how many years of salary are needed
  * to purchase the selected property.
@@ -182,7 +183,7 @@
     } else if (val === "mortgage") {
       persMetricSel.value = "salary";
     }
-    calc();
+    autoUpdate();
   });
   const mortRateInput = document.getElementById("mortRate");
   const mortYearsInput = document.getElementById("mortYears");
@@ -276,6 +277,11 @@
     localStorage.setItem("calcState", JSON.stringify(state));
   }
 
+  function autoUpdate() {
+    saveState();
+    calc();
+  }
+
   function buildCurveUI() {
     const yrs = +yrsInput.value;
     const start = +startYearInput.value;
@@ -303,6 +309,7 @@
       input.addEventListener("input", () => {
         label.textContent = input.value;
         savingsCurve[idx] = +input.value;
+        autoUpdate();
       });
       bar.appendChild(label);
       bar.appendChild(input);
@@ -318,10 +325,31 @@
       yrsLabel.textContent = yrsInput.value;
       rateLabel.textContent = rateInput.value;
       buildCurveUI();
-      calc();
+      autoUpdate();
     };
     el.addEventListener("input", handler);
     el.addEventListener("change", handler);
+  });
+
+  [
+    locSel,
+    changeYearInput,
+    newCareerSel,
+    sizeInput,
+    salaryInput,
+    retInput,
+    inflFloorInput,
+    scenarioSel,
+    careerSel,
+    propMetricSel,
+    persMetricSel,
+    initSavingsInput,
+    mortRateInput,
+    mortYearsInput,
+    downPctInput,
+  ].forEach((el) => {
+    el.addEventListener("input", autoUpdate);
+    el.addEventListener("change", autoUpdate);
   });
 
   const palette = [
@@ -653,10 +681,6 @@
     URL.revokeObjectURL(a.href);
   }
 
-  document.getElementById("update").addEventListener("click", () => {
-    saveState();
-    calc();
-  });
 
   csvBtn.addEventListener("click", exportCSV);
 
@@ -682,7 +706,7 @@
     updateThemeLabel();
     savingsCurve = [];
     buildCurveUI();
-    calc();
+    autoUpdate();
   });
 
   loadState();
