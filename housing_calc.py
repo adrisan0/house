@@ -2,6 +2,8 @@
 
 This module replicates the main projection logic from the web
 calculator and exposes a small CLI to run projections offline.
+Salaries can be provided as net monthly amounts or annual gross
+with pay periods and IRPF withholding.
 """
 
 from __future__ import annotations
@@ -30,6 +32,9 @@ class ProjectionInput:
     ret_rate: float
     career: str
     init_savings: float
+    salary_type: str = "net"
+    pays: int = 12
+    irpf: float = 0.2
     size: float = 1.0
 
 
@@ -70,8 +75,13 @@ def growth_for(year: int, career: str) -> float:
     return schedule[2]
 
 
+def net_monthly(gross: float, pays: int, irpf: float) -> float:
+    """Convert an annual gross salary to net monthly amount."""
+    return gross / pays * (1 - irpf)
+
+
 def project_salary(base: float, years: int, career: str) -> List[float]:
-    """Return projected monthly salary values."""
+    """Return projected monthly net salary values."""
     values = [base]
     salary = base
     for y in range(1, years + 1):
@@ -88,7 +98,7 @@ def project_savings(
     career: str,
     init_savings: float,
 ) -> List[float]:
-    """Return projected savings balance over time."""
+    """Return projected savings balance over time using net salary."""
     savings = init_savings
     values = [savings]
     salary = base_salary
@@ -108,19 +118,25 @@ def run_projection(params: ProjectionInput) -> None:
         params.inflation,
         params.floor,
     )
-    salaries = project_salary(params.salary, params.years, params.career)
+    base_net = (
+        params.salary
+        if params.salary_type == "net"
+        else net_monthly(params.salary, params.pays, params.irpf)
+    )
+    salaries = project_salary(base_net, params.years, params.career)
     savings = project_savings(
-        params.salary,
+        base_net,
         params.save_rate,
         params.years,
         params.ret_rate,
         params.career,
         params.init_savings,
     )
-    print("Year,Price,Savings,Salary")
+    print("Year,Price,Savings,MonthlySaving,Salary")
     for y in range(params.years + 1):
+        save = salaries[y] * params.save_rate
         print(
-            f"{y},{prices[y]:.2f},{savings[y]:.2f},{salaries[y]:.2f}"
+            f"{y},{prices[y]:.2f},{savings[y]:.2f},{save:.2f},{salaries[y]:.2f}"
         )
 
 
@@ -135,6 +151,14 @@ def parse_args(argv: Iterable[str] | None = None) -> ProjectionInput:
     )
     parser.add_argument("--floor", type=float, default=0.02, help="Inflation floor")
     parser.add_argument("--salary", type=float, default=1500, help="Monthly salary")
+    parser.add_argument(
+        "--salary-type",
+        choices=["net", "gross"],
+        default="net",
+        help="Input salary as net monthly or gross annual",
+    )
+    parser.add_argument("--pays", type=int, default=12, help="Pay periods per year")
+    parser.add_argument("--irpf", type=float, default=20.0, help="IRPF percentage")
     parser.add_argument("--save-rate", type=float, default=0.1, help="Savings rate")
     parser.add_argument(
         "--return-rate", type=float, default=0.03, help="Annual return on savings"
@@ -152,6 +176,9 @@ def parse_args(argv: Iterable[str] | None = None) -> ProjectionInput:
         inflation=args.inflation,
         floor=args.floor,
         salary=args.salary,
+        salary_type=args.salary_type,
+        pays=args.pays,
+        irpf=args.irpf / 100,
         save_rate=args.save_rate,
         ret_rate=args.return_rate,
         career=args.career,

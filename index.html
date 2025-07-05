@@ -269,12 +269,30 @@
           max="300"
         />
 
-        <label>Starting net salary (€/month)</label>
+        <label>Salary type</label>
+        <select id="salaryType">
+          <option value="net">Neto mensual</option>
+          <option value="gross">Bruto anual</option>
+        </select>
+
+        <label>Salary amount</label>
         <input
           id="salary"
           type="number"
           value="1450"
         />
+
+        <label>Pay periods per year</label>
+        <input id="pays" type="number" value="12" min="1" max="16" />
+
+        <label>IRPF (%)</label>
+        <select id="irpf">
+          <option>15</option>
+          <option>20</option>
+          <option>25</option>
+          <option>30</option>
+          <option>35</option>
+        </select>
 
         <label>
           Savings rate (
@@ -357,6 +375,9 @@
         <select id="persMetric">
           <option value="savings">
             💸 Ahorros acumulados
+          </option>
+          <option value="saveMonth">
+            💹 Ahorro mensual
           </option>
           <option value="salary">
             🪙 Salario neto mensual

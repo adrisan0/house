@@ -21,6 +21,11 @@ projection period.
 You can also display the number of salary years needed to purchase a property
 via the new "Años de salario" metric.
 
+Salary can be entered as monthly net or annual gross. When using gross,
+specify the number of pay periods and an IRPF percentage to compute the
+net amount. A new personal metric shows your monthly saving instead of the
+accumulated total.
+
 Job hopping can now be modeled by selecting a change year and future career
 path. Salary growth switches to the new trajectory from that year onward.
 A savings curve editor lets you adjust the saving rate for each projection

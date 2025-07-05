@@ -161,6 +161,9 @@
   const startYearInput = document.getElementById("startYear");
   const sizeInput = document.getElementById("size");
   const salaryInput = document.getElementById("salary");
+  const salaryTypeSel = document.getElementById("salaryType");
+  const paysInput = document.getElementById("pays");
+  const irpfSel = document.getElementById("irpf");
   const rateInput = document.getElementById("rate");
   const rateLabel = document.getElementById("rateLabel");
   const curveContainer = document.getElementById("saveCurve");
@@ -208,6 +211,9 @@
     startYear: startYearInput.value,
     size: sizeInput.value,
     salary: salaryInput.value,
+    salaryType: salaryTypeSel.value,
+    pays: paysInput.value,
+    irpf: irpfSel.value,
     rate: rateInput.value,
     ret: retInput.value,
     inflFloor: inflFloorInput.value,
@@ -400,6 +406,11 @@
     const yrs = +yrsInput.value;
     const m2 = +sizeInput.value;
     const base = +salaryInput.value;
+    const salaryType = salaryTypeSel.value;
+    const pays = +paysInput.value;
+    const irpf = +irpfSel.value / 100;
+    const baseNet =
+      salaryType === "gross" ? (base / pays) * (1 - irpf) : base;
     const saveRates = savingsCurve.length
       ? savingsCurve.map((v) => v / 100)
       : Array.from({ length: yrs + 1 }, () => +rateInput.value / 100);
@@ -416,8 +427,9 @@
 
     // personal metrics
     let stash = +initSavingsInput.value;
-    let net = base;
+    let net = baseNet;
     const savingsArr = [];
+    const monthlySaveArr = [];
     const salaryArr = [];
     for (let y = 0; y <= yrs; y++) {
       if (y) {
@@ -426,6 +438,7 @@
       salaryArr.push(Math.round(net));
       stash *= 1 + ret;
       const sr = saveRates[y] ?? saveRates[saveRates.length - 1];
+      monthlySaveArr.push(Math.round(net * sr));
       stash += net * sr * 12;
       savingsArr.push(Math.round(stash));
     }
@@ -437,6 +450,14 @@
         label: "Savings €",
         data: savingsArr,
         borderColor: "#22c55e",
+        tension: 0.2,
+        borderWidth: 2,
+      });
+    } else if (persMetric === "saveMonth") {
+      datasets.push({
+        label: "Monthly saving €",
+        data: monthlySaveArr,
+        borderColor: "#7dd3fc",
         tension: 0.2,
         borderWidth: 2,
       });
@@ -580,7 +601,11 @@
     // summary y render idéntico al anterior...
     const propVal = datasets[1].data.at(-1);
     const personalVal =
-      persMetric === "savings" ? savingsArr.at(-1) : salaryArr.at(-1);
+      persMetric === "savings"
+        ? savingsArr.at(-1)
+        : persMetric === "saveMonth"
+          ? monthlySaveArr.at(-1)
+          : salaryArr.at(-1);
     let summaryHTML = "";
     if (propMetric === "down") {
       const ok = personalVal >= propVal;
@@ -588,7 +613,11 @@
         `Necesitas ${propVal.toLocaleString()}€ ` +
         `para la entrada (${downPct * 100}%).<br>` +
         `${
-          persMetric === "savings" ? "Ahorros" : "Salario"
+          persMetric === "savings"
+            ? "Ahorros"
+            : persMetric === "saveMonth"
+              ? "Ahorro mensual"
+              : "Salario"
         } tras ${yrs} años: ` +
         `<span style="color:${
           ok ? "var(--good)" : "var(--bad)"
