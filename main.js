@@ -723,6 +723,7 @@ function buildCurveUI() {
     }
 
     const datasets = [];
+    const downMap = {};
     // personal
     if (persMetric === "savings") {
       datasets.push({
@@ -787,6 +788,8 @@ function buildCurveUI() {
         return sum / kids.length;
       });
       let propArr, label;
+      const downArr = avgPrice.map((v) => v * downPct);
+      downMap[g.replace("grupo_", "")] = downArr;
       if (propMetric === "price") {
         propArr = avgPrice.map((v) => Math.round(v));
         label = `${g.replace("grupo_", "")} price €`;
@@ -819,6 +822,8 @@ function buildCurveUI() {
             : d.inflMid;
       const priceArr = priceArrFor(name, infl, inflFloor);
       let propArr, label;
+      const downArr = priceArr.map((v) => v * downPct);
+      downMap[name] = downArr;
       if (propMetric === "price") {
         propArr = priceArr.map((v) => Math.round(v));
         label = `${name} price €`;
@@ -863,6 +868,15 @@ function buildCurveUI() {
         borderWidth: 2,
       });
     }
+
+    const matchesByYear = labels.map(() => []);
+    Object.entries(downMap).forEach(([name, arr]) => {
+      arr.forEach((val, idx) => {
+        if (Math.abs(val - savingsArr[idx]) / val <= 0.08) {
+          matchesByYear[idx].push(name);
+        }
+      });
+    });
 
     lastCalc = {
       labels: [...labels],
@@ -937,6 +951,16 @@ function buildCurveUI() {
         },
       },
     });
+
+    const matchesHTML =
+      "<table><tr>" +
+      labels.map((y) => `<th>${y}</th>`).join("") +
+      "</tr><tr>" +
+      matchesByYear
+        .map((m) => `<td>${m.join(", ") || "&nbsp;"}</td>`)
+        .join("") +
+      "</tr></table>";
+    document.getElementById("matches").innerHTML = matchesHTML;
   }
 
   /**
