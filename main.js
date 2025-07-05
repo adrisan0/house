@@ -200,6 +200,60 @@
   const newCareerSel = document.getElementById("newCareer");
   const propMetricSel = document.getElementById("propMetric");
   const persMetricSel = document.getElementById("persMetric");
+  const mapContainer = document.getElementById("map");
+  let spainMap;
+
+  /**
+   * Initialize the Spain mini map for province selection.
+   */
+  function initMap() {
+    if (!window.jsVectorMap || !window.PROVINCE_CODES || !mapContainer) return;
+
+    const codeToName = {};
+    Object.entries(window.PROVINCE_CODES).forEach(([n, c]) => {
+      codeToName[c] = n;
+    });
+
+    const initial = [...locSel.options]
+      .filter((o) => o.selected && window.PROVINCE_CODES[o.textContent])
+      .map((o) => window.PROVINCE_CODES[o.textContent]);
+
+    spainMap = new jsVectorMap({
+      selector: "#map",
+      map: "spain",
+      zoomButtons: false,
+      zoomOnScroll: false,
+      regionsSelectable: true,
+      regionsSelectableOne: false,
+      selectedRegions: initial,
+      regionStyle: {
+        selected: { fill: getComputedStyle(document.documentElement).getPropertyValue("--accent") },
+      },
+    });
+
+    spainMap.on("region:selected", (code, isSelected) => {
+      const name = codeToName[code];
+      if (!name) return;
+      [...locSel.options].forEach((o) => {
+        if (o.textContent === name) o.selected = isSelected;
+      });
+      autoCalc();
+    });
+
+    locSel.addEventListener("change", () => {
+      const codes = [...locSel.options]
+        .filter((o) => o.selected && window.PROVINCE_CODES[o.textContent])
+        .map((o) => window.PROVINCE_CODES[o.textContent]);
+      if (spainMap) {
+        spainMap.clearSelectedRegions();
+        spainMap._setSelected("regions", codes);
+      }
+    });
+
+    resetBtn.addEventListener("click", () => {
+      if (spainMap) spainMap.clearSelectedRegions();
+    });
+  }
 
   // Sync personal metric with the chosen property metric.
   // Price/Down -> savings, Mortgage -> salary
@@ -289,6 +343,13 @@
         [...locSel.options].forEach((o) => {
           o.selected = state.loc.includes(o.value);
         });
+        if (spainMap) {
+          const codes = state.loc
+            .map((name) => window.PROVINCE_CODES[name])
+            .filter(Boolean);
+          spainMap.clearSelectedRegions();
+          spainMap._setSelected("regions", codes);
+        }
       }
       if (state.theme) {
         document.documentElement.dataset.theme = state.theme;
@@ -957,6 +1018,7 @@ function buildCurveUI() {
     calc();
   });
 
+  initMap();
   loadState();
   updateSalaryFields();
   updateThemeLabel();
