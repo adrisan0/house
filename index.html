@@ -92,6 +92,7 @@
       }
       .hidden {
         display: none;
+      }
       .chart-container {
         padding: 30px;
         margin-top: 20px;
@@ -102,6 +103,16 @@
         max-width: 700px;
         margin: 0 auto;
         padding: 10px;
+      }
+      .chart-container table {
+        width: 100%;
+        margin-top: 10px;
+        font-size: 0.8rem;
+        table-layout: fixed;
+      }
+      .chart-container th,
+      .chart-container td {
+        text-align: center;
       }
       canvas {
         background: #0f0f0f;
@@ -541,6 +552,7 @@
 
       <div class="panel chart-container">
         <canvas id="chart" height="300"></canvas>
+        <div id="matches"></div>
       </div>
     </div>
 

@@ -86,3 +86,6 @@ When selecting the property metric, the personal metric adjusts automatically:
 - **Cuota hipoteca** → "Salario neto mensual"
 - Las líneas del gráfico muestran su nombre de leyenda junto al
   punto final en el extremo derecho.
+- Bajo la gráfica se muestra una tabla con las ubicaciones que se pueden
+  costear cada año. Para aparecer en la tabla la entrada estimada debe
+  estar dentro de un 8% arriba o abajo del ahorro acumulado de ese año.
