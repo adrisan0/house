@@ -23,7 +23,8 @@ you switch between dark and light modes, and your preference is saved.
 You can now export the latest projection to a CSV file using the "Download CSV" button.
 The old "Update" button has been removed since changes recalc and save automatically.
 All fields update the chart automatically as soon as you modify them. Your selections are
-saved instantly so the state persists across sessions.
+saved instantly so the state persists across sessions. Los campos numéricos aceptan tanto
+punto como coma para los decimales.
 The required down payment percentage is now configurable. When viewing savings
 against the chosen down payment, you see both curves to check if your savings
 will cover the payment within the projection period. The summary indicates the
