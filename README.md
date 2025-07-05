@@ -2,7 +2,8 @@
 
 This project contains a housing affordability calculator. You can simply open
 `index.html` in your browser, although serving it with a local HTTP server is
-still recommended.
+still recommended. The page styles are now kept in `style.css`, which introduces
+new fonts, colors and transitions for a cleaner look.
 
 Launch a server from the project root with:
 

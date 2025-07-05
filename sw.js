@@ -4,6 +4,7 @@ const ASSETS = [
   './',
   'index.html',
   'main.js',
+  'style.css',
   'provinces.js',
   'https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js'
 ];
