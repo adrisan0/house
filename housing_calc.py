@@ -58,9 +58,14 @@ def inflation_for(year: int, base: float, floor: float) -> float:
 
 
 def mortgage_payment(principal: float, rate_pct: float, years: int) -> float:
-    """Monthly mortgage payment using the annuity formula."""
+    """Monthly mortgage payment using the annuity formula.
+
+    Returns 0 when ``years`` is less than or equal to zero.
+    """
     r = rate_pct / 100 / 12
     n = years * 12
+    if n <= 0:
+        return 0.0
     if r == 0:
         return principal / n
     return (principal * r * (1 + r) ** n) / ((1 + r) ** n - 1)
