@@ -36,9 +36,10 @@ type, pay periods and IRPF rate to derive monthly net pay.
 The personal metric selector adds "Ahorro mensual" to visualize monthly
 savings alongside the accumulated amount.
 
-The interface now offers a dropdown to choose the dwelling type and
-controls for rooms and optional extras (jardín, terraza, patio o sótano).
-These selections are stored but no price adjustments are applied yet.
+The dwelling options now live in a dedicated section. Type, size, rooms and
+extras (jardín, terraza, patio o sótano) sit in a flexible grid so each choice
+is quick to identify. The extras use a checkbox grid for a tidy layout. These
+selections are still stored but do not affect the calculation yet.
 
 The control panel groups related fields in expandable sections for a
 Estas se muestran colapsadas por defecto para reducir el desorden.
